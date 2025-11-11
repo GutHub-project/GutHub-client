@@ -2,11 +2,18 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "web:dev": "turbo run --filter=web dev",
+    "native:dev": "turbo run --filter=native dev",
     "build": "turbo run build",
+    "web:build": "turbo run --filter=web build",
+    "native:build": "turbo run --filter=native build",
     "clean": "turbo run clean && rm -rf node_modules",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
   },
   "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
     "@types/minimatch": "^6.0.0",
     "prettier": "^3.1.1",
     "turbo": "^2.6.0"

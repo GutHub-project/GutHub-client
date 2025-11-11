@@ -1,0 +1,34 @@
+{
+  "name": "@repo/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "base.js",
+    "react.js",
+    "nextjs.js",
+    "react-native.js",
+    ".prettierrc.js"
+  ],
+  "exports": {
+    "./base": "./base.js",
+    "./react": "./react.js",
+    "./nextjs": "./nextjs.js",
+    "./react-native": "./react-native.js",
+    "./prettier": "./.prettierrc.js"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.0.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.5.4"
+  }
+}
+

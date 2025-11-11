@@ -13,7 +13,15 @@
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@repo/*": ["../packages/*"],
+      "@repo/ui": ["../packages/ui/src"],
+      "@repo/tailwind-config": ["../packages/tailwind-config/tailwind.config.ts"],
+      "@repo/native": ["../apps/native/app"],
+      "@repo/web": ["../apps/web/app"],
+      "@repo/shared": ["../packages/shared/src"]
+    }
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,7 +1,12 @@
-import { Stack } from "expo-router"
+import { QueryProvider } from "@repo/shared";
+import { Stack } from "expo-router";
 
 const AppLayout = () => {
-  return <Stack />
-}
+  return (
+    <QueryProvider>
+      <Stack />
+    </QueryProvider>
+  );
+};
 
-export default AppLayout
+export default AppLayout;
