@@ -1,5 +1,6 @@
 import { QueryProvider } from "@repo/shared";
 import { Stack } from "expo-router";
+import React from "react";
 
 const AppLayout = () => {
   return (

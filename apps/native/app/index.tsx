@@ -1,19 +1,15 @@
-import { StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { Button } from "@repo/shared";
+import Constants from "expo-constants";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+
+import WebViewContainer from "../components/webview/WebViewContainer";
+
+const BASE_URL = Constants.expoConfig?.extra?.baseUrl ?? "";
 
 export default function Native() {
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Native</Text>
-      <Button
-        onClick={() => {
-          console.log("Pressed!");
-          alert("Pressed!");
-        }}
-        text="Boop"
-      />
-      <StatusBar style="auto" />
+      <WebViewContainer baseURL={BASE_URL} />
     </View>
   );
 }
@@ -21,13 +17,5 @@ export default function Native() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  header: {
-    fontWeight: "bold",
-    marginBottom: 20,
-    fontSize: 36,
   },
 });

@@ -23,5 +23,6 @@
       "@repo/shared": ["../packages/shared/src"]
     }
   },
+  "include": ["../../global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
