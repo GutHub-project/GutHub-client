@@ -1,10 +1,142 @@
 @import "tailwindcss";
 
-body {
-  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica",
-    "Arial", sans-serif;
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  justify-content: center;
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+}
+
+html,
+body,
+:root {
+  height: 100%;
+}
+
+@layer base {
+  body {
+    font-family: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+      system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
+      "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", sans-serif;
+  }
+}
+
+@keyframes modalOpen {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scaleY(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes fadeInFooter {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 1s ease forwards;
+}
+
+.animate-fadeIn-footer {
+  animation: fadeInFooter 1.2s ease-in-out forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 3s ease-out forwards;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.7s ease forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out;
+}
+.animate-slideOut {
+  animation: slideOut 1s forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-modalOpen {
+  animation: modalOpen 0.5s ease-out;
 }
