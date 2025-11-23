@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: guthub-client
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: develop
+    
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. AWS 자격 증명 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. Amazon ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Docker 이미지 빌드, 태깅, ECR 푸시
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # 5. EC2에 배포
+      - name: Deploy to EC2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          echo "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            
+            docker stop guthub-client || true
+            docker rm guthub-client || true
+            
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            
+            docker run -d \
+              --name guthub-client \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            
+            docker image prune -af
+          EOF
+          
+          rm -f private_key.pem
+
+      # 6. 배포 결과 알림
+      - name: Deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ 배포가 성공적으로 완료되었습니다!"
+          else
+            echo "❌ 배포 중 오류가 발생했습니다."
+          fi
+
