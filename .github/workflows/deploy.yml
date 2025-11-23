@@ -10,7 +10,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: guthub-client
+  ECR_REPOSITORY: guthub_client
 
 jobs:
   build-and-deploy:
@@ -68,13 +68,13 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
-            docker stop guthub-client || true
-            docker rm guthub-client || true
+            docker stop guthub_client || true
+            docker rm guthub_client || true
             
             docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             
             docker run -d \
-              --name guthub-client \
+              --name guthub_client \
               -p 3000:3000 \
               --restart unless-stopped \
               ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
