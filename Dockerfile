@@ -26,15 +26,18 @@
   # --docker    : Docker 빌드에 최적화된 pruned 출력 구조 생성 (json + full)
   RUN turbo prune --scope=web --docker
   
-  # ----------------------------------------------------------------------
-  # Stage 2: Installer - Pruned된 소스코드 기반 의존성 설치 및 빌드
-  # ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Stage 2: Installer - Pruned된 소스코드 기반 의존성 설치 및 빌드
+# ----------------------------------------------------------------------
   FROM node:18-alpine AS installer
   LABEL stage=installer
   
   RUN apk add --no-cache libc6-compat openssl g++ make python3
   RUN npm install -g pnpm turbo
   WORKDIR /app
+  
+  # pnpm 설정: store 디렉토리 지정 (캐싱 최적화)
+  RUN pnpm config set store-dir /root/.pnpm-store
   
   # Builder 스테이지의 'out' 디렉토리에서 prune된 결과물 복사
   # 1. 필요한 package.json 파일들 복사
@@ -43,10 +46,10 @@
   COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
   COPY --from=builder /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml*
   
-  # 의존성 설치
-  # --frozen-lockfile: pnpm-lock.yaml 변경 없이 정확히 명시된 버전 설치 (CI/CD 환경 필수)
-  # 빌드 단계에서는 devDependencies도 필요하므로 --prod 플래그 제거
-  RUN pnpm install --frozen-lockfile
+  # 의존성 설치 (BuildKit 캐시 마운트 활용)
+  # --mount=type=cache: Docker 빌드 간 캐시를 재사용하여 의존성 다운로드 시간 단축
+  RUN --mount=type=cache,id=pnpm,target=/root/.pnpm-store \
+      pnpm install --frozen-lockfile
   
   # Builder 스테이지의 'out' 디렉토리에서 prune된 전체 소스코드 복사
   COPY --from=builder /app/out/full/ .
@@ -54,8 +57,9 @@
   # (선택) 프로덕션용 환경 변수 파일 복사
   # COPY .env.production ./apps/web/.env.production
   
-  # 애플리케이션 빌드
-  RUN turbo run build --filter=web...
+  # Turborepo 캐시를 활용한 빌드 (캐시 마운트)
+  RUN --mount=type=cache,id=turbo,target=/app/.turbo \
+      turbo run build --filter=web...
   
   # ----------------------------------------------------------------------
   # Stage 3: Runner - 빌드 결과물 및 최소 실행 환경 구성

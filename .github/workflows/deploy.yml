@@ -23,7 +23,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. AWS 자격 증명 설정
+      # 2. Docker Buildx 설정
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. AWS 자격 증명 설정
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -31,24 +35,40 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. Amazon ECR 로그인
+      # 4. Amazon ECR 로그인
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Docker 이미지 빌드, 태깅, ECR 푸시
+      # 5. Docker 레이어 캐시 설정
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # 6. Docker 이미지 빌드, 태깅, ECR 푸시 (캐싱 적용)
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker buildx build \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --cache-to type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache,mode=max \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --push \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            .
           
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
           
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -66,20 +86,51 @@ jobs:
           chmod 600 private_key.pem
           
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+            set -e
+            
+            echo "📊 배포 전 디스크 사용량 확인..."
+            df -h /
+            
+            echo "🧹 Docker 리소스 정리 중..."
+            docker image prune -af --filter "until=24h" || true
+            docker volume prune -f || true
+            docker network prune -f || true
+            
+            DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            if [ "$DISK_USAGE" -gt 85 ]; then
+              echo "⚠️  경고: 디스크 사용량이 ${DISK_USAGE}%입니다. 추가 정리를 수행합니다..."
+              docker system prune -af --volumes || true
+            fi
+            
+            echo "🔐 AWS ECR 로그인 중..."
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
+            echo "🛑 기존 컨테이너 중지 및 제거..."
             docker stop guthub_client || true
             docker rm guthub_client || true
             
+            echo "📥 새 Docker 이미지 다운로드 중..."
             docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             
+            echo "🚀 새 컨테이너 시작 중..."
             docker run -d \
               --name guthub_client \
               -p 3000:3000 \
               --restart unless-stopped \
+              --log-driver json-file \
+              --log-opt max-size=10m \
+              --log-opt max-file=3 \
               ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             
+            echo "🧹 사용하지 않는 이미지 정리..."
             docker image prune -af
+            
+            echo "✅ 배포 완료! 디스크 사용량:"
+            df -h /
+            
+            echo "🔍 컨테이너 상태 확인..."
+            sleep 3
+            docker ps -f name=guthub_client
           EOF
           
           rm -f private_key.pem
