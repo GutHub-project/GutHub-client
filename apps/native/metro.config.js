@@ -17,10 +17,29 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
-// 3. Enable package exports support
-config.resolver.unstable_enablePackageExports = true;
+// 3. Force Metro to use source files for workspace packages
+config.resolver.unstable_enablePackageExports = false;
 
-// 4. Disable hierarchical lookup to prevent pnpm issues
+// 4. Resolve workspace packages to their source
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName.startsWith("@repo/")) {
+    const packageName = moduleName.split("/")[1];
+    const subPath = moduleName.split("/").slice(2).join("/");
+
+    const sourcePath = subPath
+      ? path.join(workspaceRoot, "packages", packageName, "src", subPath)
+      : path.join(workspaceRoot, "packages", packageName, "src", "index.ts");
+
+    return {
+      filePath: sourcePath,
+      type: "sourceFile",
+    };
+  }
+
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+// 5. Disable hierarchical lookup to prevent pnpm issues
 config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;
