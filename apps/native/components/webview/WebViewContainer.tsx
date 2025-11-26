@@ -1,16 +1,21 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
+import { useAuthStore } from "../../store/authStore";
+
 export default function WebViewContainer({ baseURL }: { baseURL: string }) {
   const router = useRouter();
+  const webViewRef = useRef<WebView>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { tokens, loginType, socialProvider } = useAuthStore();
 
   const requestOnMessage = (event: WebViewMessageEvent) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
+
       if (message.type === 'ROUTER_EVENT') {
         const { method, path, data } = message;
 
@@ -35,9 +40,36 @@ export default function WebViewContainer({ baseURL }: { baseURL: string }) {
             router.back();
             break;
         }
+      } else if (message.type === 'REQUEST_AUTH') {
+        sendAuthToWebView();
       }
     } catch (err) {
       console.warn('Invalid message format', err);
+    }
+  };
+
+  const sendAuthToWebView = () => {
+    if (!webViewRef.current || !tokens) return;
+
+    const authData = {
+      type: 'AUTH_DATA',
+      payload: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        loginType,
+        socialProvider,
+      },
+    };
+
+    webViewRef.current.postMessage(JSON.stringify(authData));
+  };
+
+  const handleLoadEnd = () => {
+    setLoading(false);
+    if (tokens) {
+      setTimeout(() => {
+        sendAuthToWebView();
+      }, 100);
     }
   };
 
@@ -63,12 +95,13 @@ export default function WebViewContainer({ baseURL }: { baseURL: string }) {
   return (
     <>
       <WebView
+        ref={webViewRef}
         allowsBackForwardNavigationGestures={true}
         bounces={false}
         source={{ uri: baseURL }}
         onMessage={requestOnMessage}
         onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
+        onLoadEnd={handleLoadEnd}
         onError={(syntheticEvent) => {
           const { nativeEvent } = syntheticEvent;
           setError(nativeEvent.description);
