@@ -1,4 +1,4 @@
-import * as React from "react";
+import { colors } from "@repo/tailwind-config/colors";
 import {
   StyleSheet,
   GestureResponderEvent,
@@ -29,10 +29,10 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     fontSize: 15,
-    backgroundColor: "#2f80ed",
+    backgroundColor: colors.main,
   },
   text: {
-    color: "white",
+    color: colors.white,
   },
 });
 

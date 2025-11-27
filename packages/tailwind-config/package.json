@@ -4,7 +4,10 @@
   "private": true,
   "main": "./tailwind.config.ts",
   "types": "./tailwind.config.ts",
-  "exports": { ".": "./tailwind.config.ts" },
+  "exports": {
+    ".": "./tailwind.config.ts",
+    "./colors": "./colors.ts"
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "tailwindcss": "^4.1.16"
