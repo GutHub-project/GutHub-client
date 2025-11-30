@@ -2,8 +2,8 @@ import { colors } from "./colors";
 
 const config = {
   theme: {
-    colors,
     extend: {
+      colors,
       keyframes: {
         "fade-in": {
           "0%": {
