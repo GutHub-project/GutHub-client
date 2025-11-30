@@ -1,18 +1,34 @@
-module.exports = {
-  reactStrictMode: true,
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      // Transform all direct `react-native` imports to `react-native-web`
-      "react-native$": "react-native-web",
-    };
-    config.resolve.extensions = [
-      ".web.js",
-      ".web.jsx",
-      ".web.ts",
-      ".web.tsx",
-      ...config.resolve.extensions,
-    ];
-    return config;
-  },
+const dotenv = require('dotenv');
+const path = require('path');
+
+const nextConfig = async () => {
+  const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+  const env = dotenv.config({ path: path.resolve(process.cwd(), envFile) });
+  if (env.error) {
+    throw new Error(`Failed to load ${envFile}: ${env.error.message}`);
+  }
+  console.log('설정된 환경 변수 : ', envFile);
+
+  return {
+    reactStrictMode: true,
+    webpack: (config) => {
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        'react-native$': 'react-native-web',
+      };
+      config.resolve.extensions = ['.web.js', '.web.jsx', '.web.ts', '.web.tsx', ...config.resolve.extensions];
+      return config;
+    },
+    async redirects() {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+          permanent: true,
+        },
+      ];
+    },
+  };
 };
+
+module.exports = nextConfig;
