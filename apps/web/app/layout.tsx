@@ -1,11 +1,8 @@
-import "../styles/global.css";
-import { QueryProvider } from "@repo/shared/providers";
+import { QueryProvider } from '@repo/shared';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import '../styles/global.css';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <body>

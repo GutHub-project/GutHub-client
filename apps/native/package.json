@@ -20,6 +20,7 @@
     "@react-navigation/native": "^6.1.18",
     "@repo/eslint-config": "workspace:*",
     "@repo/shared": "workspace:*",
+    "@repo/tailwind-config": "workspace:*",
     "@tanstack/react-query": "^5.90.7",
     "axios": "^1.13.2",
     "expo": "~52.0.46",
@@ -37,6 +38,7 @@
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
+    "react-native-svg": "^15.15.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "^13.16.0",
     "zustand": "^5.0.8"
