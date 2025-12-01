@@ -17,6 +17,7 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     environment: develop
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     
     steps:
       # 1. 코드 체크아웃
