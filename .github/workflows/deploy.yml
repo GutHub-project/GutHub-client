@@ -66,6 +66,8 @@ jobs:
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --push \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            --build-arg NODE_ENV=production \
             .
           
           rm -rf /tmp/.buildx-cache
@@ -79,14 +81,21 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST \
+            ECR_REGISTRY="$ECR_REGISTRY" \
+            IMAGE_TAG="$IMAGE_TAG" \
+            ECR_REPOSITORY="$ECR_REPOSITORY" \
+            NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
+            bash -s << 'EOF'
             set -e
             
             echo "📊 배포 전 디스크 사용량 확인..."
@@ -104,14 +113,14 @@ jobs:
             fi
             
             echo "🔐 AWS ECR 로그인 중..."
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${ECR_REGISTRY}
             
             echo "🛑 기존 컨테이너 중지 및 제거..."
             docker stop guthub_client || true
             docker rm guthub_client || true
             
             echo "📥 새 Docker 이미지 다운로드 중..."
-            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
             
             echo "🚀 새 컨테이너 시작 중..."
             docker run -d \
@@ -121,7 +130,9 @@ jobs:
               --log-driver json-file \
               --log-opt max-size=10m \
               --log-opt max-file=3 \
-              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+              -e NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}" \
+              -e NODE_ENV=production \
+              ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
             
             echo "🧹 사용하지 않는 이미지 정리..."
             docker image prune -af

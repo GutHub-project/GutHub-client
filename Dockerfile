@@ -32,6 +32,14 @@
   FROM node:18-alpine AS installer
   LABEL stage=installer
   
+  # 빌드 시점 환경 변수 (ARG는 빌드 시에만 사용 가능)
+  ARG NEXT_PUBLIC_API_URL
+  ARG NODE_ENV=production
+  
+  # 환경 변수를 ENV로 설정 (빌드 시점에 사용)
+  ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+  ENV NODE_ENV=${NODE_ENV}
+  
   RUN apk add --no-cache libc6-compat openssl g++ make python3
   RUN npm install -g pnpm turbo
   WORKDIR /app
@@ -93,7 +101,10 @@
   # Next.js 기본 포트 3000 노출
   EXPOSE 3000
   
-  # 환경 변수 설정 (Next.js 프로덕션 모드 필수)
+  # 런타임 환경 변수 설정
+  # ARG로 받은 환경 변수를 ENV로 설정 (런타임에 사용)
+  ARG NEXT_PUBLIC_API_URL
+  ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
   ENV NODE_ENV=production
   # Next.js Standalone Output 사용 시 필요할 수 있음
   # ENV PORT=3000
