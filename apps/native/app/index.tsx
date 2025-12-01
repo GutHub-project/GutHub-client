@@ -1,15 +1,15 @@
-import Constants from "expo-constants";
-import { StyleSheet, View } from "react-native";
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import WebViewContainer from "../components/webview/WebViewContainer";
-
-const BASE_URL = Constants.expoConfig?.extra?.baseUrl ?? "";
+import WebViewScreen from '../src/components/webview/WebViewScreen';
 
 export default function Native() {
   return (
-    <View style={styles.container}>
-      <WebViewContainer baseURL={BASE_URL} />
-    </View>
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <WebViewScreen />
+      </View>
+    </SafeAreaProvider>
   );
 }
 

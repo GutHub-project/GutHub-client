@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import WebView, { WebViewMessageEvent } from "react-native-webview";
+import { useRouter } from 'expo-router';
+import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 export default function WebViewContainer({ baseURL }: { baseURL: string }) {
   const router = useRouter();
@@ -9,13 +9,12 @@ export default function WebViewContainer({ baseURL }: { baseURL: string }) {
       const message = JSON.parse(event.nativeEvent.data);
       if (message.type === 'ROUTER_EVENT') {
         const { method, path, data } = message;
-
         switch (method) {
           case 'PUSH':
             if (path) {
               router.push({
                 pathname: path,
-                params: { ...data }
+                params: { ...data },
               });
             }
             break;
@@ -23,7 +22,7 @@ export default function WebViewContainer({ baseURL }: { baseURL: string }) {
             if (path) {
               router.replace({
                 pathname: path,
-                params: { ...data }
+                params: { ...data },
               });
             }
             break;
