@@ -6,9 +6,10 @@ const nextConfig = async () => {
   const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
   const env = dotenv.config({ path: path.resolve(process.cwd(), envFile) });
   if (env.error) {
-    throw new Error(`Failed to load ${envFile}: ${env.error.message}`);
+    console.warn(`⚠️  환경 변수 파일을 찾을 수 없습니다: ${envFile}. 환경 변수는 시스템 환경 변수에서 로드됩니다.`);
+  } else {
+    console.log('설정된 환경 변수 : ', envFile);
   }
-  console.log('설정된 환경 변수 : ', envFile);
 
   return {
     reactStrictMode: true,
@@ -29,13 +30,17 @@ const nextConfig = async () => {
       return config;
     },
     async redirects() {
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
-          permanent: true,
-        },
-      ];
+      // NEXT_PUBLIC_API_URL이 설정된 경우에만 redirect 추가
+      if (process.env.NEXT_PUBLIC_API_URL) {
+        return [
+          {
+            source: '/api/:path*',
+            destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+            permanent: true,
+          },
+        ];
+      }
+      return [];
     },
   };
 };
