@@ -31,9 +31,6 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router"],
-    "extra": {
-      "baseUrl": "https://www.guthub.shop"
-    }
+    "plugins": ["expo-router"]
   }
 }
