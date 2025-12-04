@@ -1,3 +1,3 @@
-export { Button, type ButtonProps } from "./button";
-export { Text, type TextProps } from "./text";
+export { Button, type ButtonProps } from "./Button";
+export { Text, type TextProps } from "./Text";
 

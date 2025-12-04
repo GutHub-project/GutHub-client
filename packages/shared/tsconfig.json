@@ -6,9 +6,13 @@
     "skipLibCheck": true,
     "types": ["node"],
     "jsx": "react-jsx",
-    "lib": ["ES2020", "DOM"]
+    "lib": ["ES2020", "DOM"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "target": "ES2020"
   },
-  "include": ["src/**/*", "../../global.d.ts"],
+  "include": ["src/**/*", "src/**/*.tsx", "../../global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
 

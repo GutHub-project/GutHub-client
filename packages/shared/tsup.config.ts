@@ -9,8 +9,12 @@ export default defineConfig({
   },
   format: ["cjs", "esm"],
   dts: {
+    resolve: true,
     compilerOptions: {
       skipLibCheck: true,
+      jsx: "react-jsx",
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
     },
   },
   banner: {
