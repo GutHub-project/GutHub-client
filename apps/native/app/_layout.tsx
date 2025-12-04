@@ -40,6 +40,8 @@ const AppLayout = () => {
       <Stack
         screenOptions={{
           headerShown: false,
+          animation: 'fade',
+          animationDuration: 300,
         }}
       />
     </QueryProvider>
