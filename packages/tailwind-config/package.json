@@ -2,9 +2,14 @@
   "name": "@repo/tailwind-config",
   "version": "0.0.0",
   "private": true,
-  "main": "./tailwind.config.ts",
-  "types": "./tailwind.config.ts",
-  "exports": { ".": "./tailwind.config.ts" },
+  "main": "./src/index.ts",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "tailwindcss": "^4.1.16"

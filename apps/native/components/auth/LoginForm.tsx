@@ -5,9 +5,10 @@ import { SocialProvider } from '../../types/auth';
 interface LoginFormProps {
   onSocialLogin: (provider: SocialProvider) => void;
   onBrowse: () => void;
+  onSignup: () => void;
 }
 
-export const LoginForm = ({ onSocialLogin, onBrowse }: LoginFormProps) => {
+export const LoginForm = ({ onSocialLogin, onBrowse, onSignup }: LoginFormProps) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.browseButton} onPress={onBrowse}>
@@ -50,6 +51,14 @@ export const LoginForm = ({ onSocialLogin, onBrowse }: LoginFormProps) => {
         >
           <Text style={styles.googleButtonText}>G 구글 로그인</Text>
         </TouchableOpacity>
+
+        {/* 회원가입 링크 */}
+        <View style={styles.signupContainer}>
+          <Text style={styles.signupText}>아직 회원이 아니신가요?</Text>
+          <TouchableOpacity onPress={onSignup}>
+            <Text style={styles.signupLink}>회원가입</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -151,5 +160,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Pretendard-SemiBold',
     color: '#333',
+  },
+  signupContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 8,
+  },
+  signupText: {
+    fontSize: 14,
+    fontFamily: 'Pretendard-Regular',
+    color: '#666',
+  },
+  signupLink: {
+    fontSize: 14,
+    fontFamily: 'Pretendard-SemiBold',
+    color: '#EE8688',
   },
 });
