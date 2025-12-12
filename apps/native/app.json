@@ -38,7 +38,8 @@
       "expo-secure-store"
     ],
     "extra": {
-      "baseUrl": "https://www.guthub.shop"
+      "baseUrl": "https://www.guthub.shop",
+      "apiUrl": "http://api.guthub.shop:8080"
     }
   }
 }

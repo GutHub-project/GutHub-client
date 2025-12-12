@@ -18,6 +18,9 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+const isWeb = Platform.OS === 'web';
 
 import { AuthTokens, LoginType, SocialProvider } from '../types/auth';
 
@@ -43,6 +46,11 @@ export const tokenStorage = {
     loginType: LoginType,
     socialProvider?: SocialProvider
   ): Promise<void> {
+    if (isWeb) {
+      // Web 환경에서는 expo-secure-store가 동작하지 않으므로 저장 생략
+      console.warn('SecureStore is not available on web. Skipping token save.');
+      return;
+    }
     try {
       // 토큰을 JSON 문자열로 저장
       await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(tokens));
@@ -71,6 +79,7 @@ export const tokenStorage = {
    * @returns AuthTokens | null
    */
   async getTokens(): Promise<AuthTokens | null> {
+    if (isWeb) return null;
     try {
       const tokensStr = await SecureStore.getItemAsync(TOKEN_KEY);
       return tokensStr ? JSON.parse(tokensStr) : null;
@@ -84,6 +93,7 @@ export const tokenStorage = {
    * 로그인 타입 조회
    */
   async getLoginType(): Promise<LoginType | null> {
+    if (isWeb) return null;
     try {
       const loginType = await SecureStore.getItemAsync(LOGIN_TYPE_KEY);
       return loginType as LoginType | null;
@@ -97,6 +107,7 @@ export const tokenStorage = {
    * 소셜 제공자 조회
    */
   async getSocialProvider(): Promise<SocialProvider | null> {
+    if (isWeb) return null;
     try {
       const provider = await SecureStore.getItemAsync(SOCIAL_PROVIDER_KEY);
       return provider as SocialProvider | null;
@@ -118,6 +129,10 @@ export const tokenStorage = {
    * @param accessToken - 새로 발급받은 accessToken
    */
   async updateAccessToken(accessToken: string): Promise<void> {
+    if (isWeb) {
+      console.warn('SecureStore is not available on web. Skipping accessToken update.');
+      return;
+    }
     try {
       const tokens = await this.getTokens();
       if (tokens) {
@@ -140,6 +155,7 @@ export const tokenStorage = {
    * 로그아웃 시 호출
    */
   async clearTokens(): Promise<void> {
+    if (isWeb) return;
     try {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(LOGIN_TYPE_KEY);

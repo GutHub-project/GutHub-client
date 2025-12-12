@@ -17,13 +17,16 @@
  */
 
 import { useState } from 'react';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 
 import { authService } from '../services/authService';
 import { useAuthStore } from '../store/authStore';
 import { EmailLoginRequest, SocialProvider } from '../types/auth';
 
 export const useAuth = () => {
-  const { setAuth, clearAuth, loadAuth, isAuthenticated, loginType } = useAuthStore();
+  const { setAuth, clearAuth, loadAuth, isAuthenticated, loginType, updateAccessToken } =
+    useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,25 +135,46 @@ export const useAuth = () => {
    * @param provider - 소셜 로그인 제공자 ('google' | 'kakao' | 'naver')
    * @param _providerAccessToken - (현재 미사용) 소셜 제공자에서 받은 토큰
    */
-  const socialLogin = async (provider: SocialProvider, _providerAccessToken: string) => {
+  const socialLogin = async (provider: SocialProvider) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: 백엔드 완성 후 실제 OAuth2 플로우로 교체
-      // 현재는 Mock 데이터 사용
-      const response = authService.mockSocialLogin(provider);
+      // 1) OAuth2 시작 URL
+      const authUrl = authService.getOAuthURL(provider);
 
+      // 2) 리디렉션 URI (app scheme 기반)
+      const redirectUri = Linking.createURL('/login/success');
+
+      // 3) 브라우저 세션 시작
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+      if (result.type !== 'success' || !result.url) {
+        throw new Error('소셜 로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+
+      // 4) 리디렉션 URL에서 refreshToken 추출 (query param: refreshToken)
+      const parsed = Linking.parse(result.url);
+      const refreshToken = (parsed.queryParams?.refreshToken as string | undefined) || '';
+
+      if (!refreshToken) {
+        throw new Error('리프레시 토큰을 찾을 수 없습니다. 다시 시도해주세요.');
+      }
+
+      // 5) refreshToken으로 accessToken 발급
+      const { accessToken } = await authService.getAccessToken(refreshToken);
+
+      // 6) 토큰 저장 (refreshToken은 SecureStore, accessToken은 메모리)
       await setAuth(
         {
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
+          accessToken,
+          refreshToken,
         },
         'social',
         provider
       );
 
-      return response.user;
+      return { accessToken, refreshToken };
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : '소셜 로그인에 실패했습니다.';
@@ -210,13 +234,17 @@ export const useAuth = () => {
       // SecureStore에서 저장된 토큰 로드
       await loadAuth();
 
-      // TODO: 토큰 유효성 검증
-      // const { tokens } = useAuthStore.getState();
-      // if (tokens && isTokenExpired(tokens.accessToken)) {
-      //   // accessToken 만료 시 갱신 시도
-      //   const { accessToken } = await authService.refreshToken(tokens.refreshToken);
-      //   await useAuthStore.getState().updateAccessToken(accessToken);
-      // }
+      const { tokens } = useAuthStore.getState();
+      // refreshToken만 저장되어 있을 수 있으므로, 앱 시작 시 accessToken 재발급
+      if (tokens?.refreshToken) {
+        try {
+          const { accessToken } = await authService.refreshToken(tokens.refreshToken);
+          await updateAccessToken(accessToken);
+        } catch (err) {
+          console.warn('토큰 갱신 실패, 인증 초기화 필요:', err);
+          await clearAuth();
+        }
+      }
     } catch (err) {
       console.error('Failed to initialize auth:', err);
     } finally {

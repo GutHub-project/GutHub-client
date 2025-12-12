@@ -40,14 +40,45 @@ import {
   RefreshTokenResponse,
 } from '../types/auth';
 
+/** 회원가입 요청 타입 */
+type SignupRequest = {
+  username: string;
+  password: string;
+  nickname: string;
+  email: string;
+};
+
+/** 공통 응답 래퍼 */
+type ApiEnvelope<T> = {
+  code: string; // e.g., "SUCCESS"
+  message: string;
+  data: T;
+};
+
+/** 회원가입 응답 데이터 */
+type SignupResponseData = {
+  userEntityId: string; // 13 chars
+};
+
+/** 사용자 정보 조회 응답 데이터 */
+type UserProfileResponseData = {
+  username: string;
+  email: string;
+  nickname: string;
+  social: boolean;
+  gutType?: string;
+  imageUrl?: string;
+};
+
 /**
  * API 기본 URL
  * TODO: app.json의 extra.apiUrl에 실제 백엔드 URL 설정 필요
  * 예: https://api.guthub.com 또는 개발서버 http://localhost:8080
  */
+// 기본 백엔드 URL: 로컬 설정이 없으면 실 서버 사용
 const API_BASE_URL =
   (Constants.expoConfig?.extra?.apiUrl as string | undefined) ||
-  'http://localhost:8080';
+  'http://api.guthub.shop:8080';
 
 /**
  * OAuth2 인증 URL (백엔드)
@@ -66,8 +97,8 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  // TODO: refreshToken 쿠키를 자동으로 전송하려면 withCredentials 필요
-  // withCredentials: true,
+  // refreshToken을 HttpOnly 쿠키로 주고받는 플로우를 위해 필요
+  withCredentials: true,
 });
 
 export const authService = {
@@ -106,16 +137,15 @@ export const authService = {
    */
   async getAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
     try {
-      // TODO: 백엔드 API 스펙에 따라 요청 방식 수정
-      // 방법 1: Body에 refreshToken 담아서 전송
-      const response = await apiClient.post<RefreshTokenResponse>('/jwt/refresh', {
-        refreshToken,
-      });
-      return response.data;
-
-      // 방법 2: 쿠키로 자동 전송 (withCredentials: true 필요)
-      // const response = await apiClient.post<RefreshTokenResponse>('/jwt/refresh');
-      // return response.data;
+      // Body에 refreshToken 담아서 전송
+      const response = await apiClient.post<ApiEnvelope<{ accessToken: string }>>(
+        '/jwt/refresh',
+        { refreshToken }
+      );
+      if (response.data.code !== 'SUCCESS') {
+        throw new Error(response.data.message || '토큰 발급에 실패했습니다.');
+      }
+      return { accessToken: response.data.data.accessToken };
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || '토큰 발급에 실패했습니다.');
@@ -146,6 +176,45 @@ export const authService = {
 
   /**
    * ============================================================
+   * 회원가입
+   * ============================================================
+   *
+   * Body: { username, password, nickname, email }
+   * Response: {
+   *   code: 'SUCCESS',
+   *   message: '요청이 성공하였습니다.',
+   *   data: { userEntityId: '123456789abcd' }
+   * }
+   */
+  async signup(payload: SignupRequest): Promise<SignupResponseData> {
+    try {
+      const res = await apiClient.post<ApiEnvelope<SignupResponseData>>('/auth/signup', payload);
+      if (res.data.code !== 'SUCCESS') {
+        throw new Error(res.data.message || '회원가입에 실패했습니다.');
+      }
+      return res.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const code = (error.response?.data as any)?.code;
+        const message = (error.response?.data as any)?.message;
+        // 백엔드 상태/코드 별 메시지 매핑 유지
+        if (code === 'INVALID_INPUT') {
+          throw new Error(message || '입력 값이 올바르지 않습니다.');
+        }
+        if (code === 'DUPLICATE_USERNAME') {
+          throw new Error(message || '이미 존재하는 아이디입니다.');
+        }
+        if (code === 'DUPLICATE_EMAIL') {
+          throw new Error(message || '이미 가입된 이메일입니다.');
+        }
+        throw new Error(message || '회원가입 요청에 실패했습니다.');
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * ============================================================
    * 토큰 갱신 (리프레시)
    * ============================================================
    *
@@ -156,10 +225,15 @@ export const authService = {
    */
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     try {
-      const response = await apiClient.post<RefreshTokenResponse>('/jwt/refresh', {
-        refreshToken,
-      });
-      return response.data;
+      // Body에 refreshToken 담아서 전송하여 새 accessToken 발급
+      const response = await apiClient.post<ApiEnvelope<{ accessToken: string }>>(
+        '/jwt/refresh',
+        { refreshToken }
+      );
+      if (response.data.code !== 'SUCCESS') {
+        throw new Error(response.data.message || '토큰 갱신에 실패했습니다.');
+      }
+      return { accessToken: response.data.data.accessToken };
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || '토큰 갱신에 실패했습니다.');
@@ -183,6 +257,58 @@ export const authService = {
       await apiClient.post('/auth/logout', { refreshToken });
     } catch (error) {
       console.error('Logout error:', error);
+    }
+  },
+
+  /**
+   * ============================================================
+   * 사용자 정보 조회
+   * ============================================================
+   *
+   * 현재 로그인한 사용자의 프로필 정보 조회
+   * accessToken이 필요한 보호된 엔드포인트
+   *
+   * GET /user/me
+   * Response: {
+   *   code: 'SUCCESS',
+   *   message: '내 정보 조회 성공',
+   *   data: {
+   *     username: 'testuser',
+   *     email: 'test@guthub.com',
+   *     nickname: '테스트유저',
+   *     social: false,
+   *     gutType?: 'type1',
+   *     imageUrl?: 'https://...'
+   *   }
+   * }
+   *
+   * @returns 현재 사용자 정보
+   * @throws Error - USER_NOT_FOUND: 토큰은 유효하지만 DB에 유저 없음
+   */
+  async getUserProfile(): Promise<UserProfileResponseData> {
+    try {
+      const response = await apiClient.get<ApiEnvelope<UserProfileResponseData>>('/user/me');
+      
+      if (response.data.code !== 'SUCCESS') {
+        if (response.data.code === 'USER_NOT_FOUND') {
+          throw new Error(response.data.message || '사용자를 찾을 수 없습니다.');
+        }
+        throw new Error(response.data.message || '사용자 정보 조회에 실패했습니다.');
+      }
+      
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const code = (error.response?.data as any)?.code;
+        const message = (error.response?.data as any)?.message;
+        
+        if (code === 'USER_NOT_FOUND') {
+          throw new Error(message || '사용자를 찾을 수 없습니다.');
+        }
+        
+        throw new Error(message || '사용자 정보 조회에 실패했습니다.');
+      }
+      throw error;
     }
   },
 
