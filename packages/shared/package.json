@@ -23,6 +23,11 @@
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.mjs",
       "require": "./dist/components/index.js"
+    },
+    "./styles": {
+      "types": "./dist/styles/index.d.ts",
+      "import": "./dist/styles/index.mjs",
+      "require": "./dist/styles/index.js"
     }
   },
   "scripts": {
@@ -43,15 +48,11 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4.1.16",
     "@types/minimatch": "^6.0.0",
     "@types/node": "^20.19.24",
     "@types/react": "^18.2.14",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^4.1.16",
     "tsup": "^8.0.1",
     "typescript": "5.5.4"
   },

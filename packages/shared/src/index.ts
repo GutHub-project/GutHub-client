@@ -1,5 +1,3 @@
-import './styles.css';
-
 export * from './apis';
 export * from './components';
 export * from './constants';

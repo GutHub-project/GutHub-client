@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@source "../../packages/main-feature/src";
+@source "../../packages/shared/src";
+@source "../node_modules/@repo/main-feature/src";
+@source "../node_modules/@repo/shared/src";
+
 @theme {
   --color-main: #FF7878;
   --color-sub: #FFA4A4;
