@@ -3,7 +3,14 @@
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "moduleResolution": "bundler",
-    "types": []
+    "types": [],
+    "paths": {
+      "@repo/shared": ["../../packages/shared/dist/index.d.ts"],
+      "@repo/shared/*": ["../../packages/shared/dist/*"],
+      "@repo/main-feature": ["../../packages/main-feature/dist/index.d.ts"],
+      "@repo/main-feature/*": ["../../packages/main-feature/dist/*"]
+    },
+    "baseUrl": "."
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/**/*.ts", "../../global.d.ts"],
   "exclude": ["node_modules"]
