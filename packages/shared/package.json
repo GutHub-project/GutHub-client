@@ -23,11 +23,6 @@
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.mjs",
       "require": "./dist/components/index.js"
-    },
-    "./styles": {
-      "types": "./dist/styles/index.d.ts",
-      "import": "./dist/styles/index.mjs",
-      "require": "./dist/styles/index.js"
     }
   },
   "scripts": {
