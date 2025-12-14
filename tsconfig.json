@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/main-feature" },
+    { "path": "./apps/web" },
+    { "path": "./apps/native" }
+  ]
+}
+

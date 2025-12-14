@@ -4,7 +4,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="mt-[32px]">
+    <div className="pt-[32px]">
       {children}
     </div>
   )
