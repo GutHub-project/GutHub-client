@@ -1,9 +1,13 @@
 import { ReactNode } from 'react';
 
 import BackButton from './BackButton';
+import Date from './Date';
 import FireIcon from './FireIcon';
+import FlexBox from './FlexBox';
 import Logo from './Logo';
 import LogoName from './LogoName';
+import MainLogo from './MainLogo';
+import Text from './Text';
 
 interface AppBarProps {
   leftContent?: ReactNode;
@@ -35,3 +39,7 @@ AppBar.Logo = Logo;
 AppBar.FireIcon = FireIcon;
 AppBar.LogoName = LogoName;
 AppBar.BackButton = BackButton;
+AppBar.MainLogo = MainLogo;
+AppBar.FlexBox = FlexBox;
+AppBar.Text = Text;
+AppBar.Date = Date;
