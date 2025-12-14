@@ -1,3 +1,5 @@
+import { General } from '@repo/main-feature';
+
 export default function HomePage() {
-  return <div>HomePage</div>;
+  return <General />;
 }

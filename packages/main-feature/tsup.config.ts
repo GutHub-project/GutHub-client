@@ -3,9 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: {
     index: "src/index.ts",
-    "stores/index": "src/stores/index.ts",
-    "providers/index": "src/providers/index.ts",
-    "components/index": "src/components/index.ts",
+    "pages/index": "src/pages/index.ts",
   },
   format: ["cjs", "esm"],
   dts: {
@@ -21,7 +19,7 @@ export default defineConfig({
     js: "'use client';",
   },
   clean: true,
-  external: ["react", "react-dom", "react-native", "axios", "zustand", "@tanstack/react-query", "next", "tailwind-merge"],
-  injectStyle: true,
+  external: ["react", "react-dom", "react-native", "@repo/shared"],
+  injectStyle: false,
 });
 
