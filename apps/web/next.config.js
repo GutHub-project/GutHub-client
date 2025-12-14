@@ -13,6 +13,7 @@ const nextConfig = async () => {
 
   return {
     reactStrictMode: true,
+    transpilePackages: ['@repo/shared', '@repo/main-feature'],
     webpack: (config) => {
       config.resolve.alias = {
         ...(config.resolve.alias || {}),
