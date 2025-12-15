@@ -45,6 +45,15 @@ body,
   }
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    scrollbar-width: none;
+  }
+}
+
 @keyframes modalOpen {
   0% {
     transform: scaleY(0);

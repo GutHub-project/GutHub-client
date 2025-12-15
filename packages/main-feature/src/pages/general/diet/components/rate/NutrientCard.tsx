@@ -14,7 +14,7 @@ const NutrientCard = ({
   const progress = (amount / 100) * 100;
 
   return (
-    <div className={`bg-Black-100 rounded-[20px] p-[16px] flex flex-col gap-[8px] ${label && 'border border-main'}`}>
+    <div className={`bg-Black-100 rounded-[10px] px-[11px] h-[60px] flex justify-center flex-col gap-[2px] ${label && 'border border-main'}`}>
       <div className="flex items-center justify-between">
         <span className="text-[12px] font-medium text-Black">
           {title}({amount}g)
