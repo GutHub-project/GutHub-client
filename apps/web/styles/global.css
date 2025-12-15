@@ -19,6 +19,7 @@
   --color-Black-700: #818181;
   --color-Black-800: #494949;
   --color-Black: #000000;
+  --color-Linear: linear-gradient(90deg, rgba(255, 255, 255, 0) 8%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 92%);
 }
 
 @font-face {
