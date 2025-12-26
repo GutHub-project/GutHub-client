@@ -3,6 +3,7 @@
   "references": [
     { "path": "./packages/shared" },
     { "path": "./packages/main-feature" },
+    { "path": "./packages/user" },
     { "path": "./apps/web" },
     { "path": "./apps/native" }
   ]

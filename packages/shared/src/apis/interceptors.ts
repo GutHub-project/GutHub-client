@@ -1,11 +1,19 @@
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { privateApiInstance } from './instance';
+import { getAccessToken } from '../stores';
 
-// access token 헤더에 추가 로직 필요
+// access token 헤더에 추가
 export const requestInterceptor = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
 
   if (!config?.headers) {
     return config;
+  }
+
+  // Zustand store에서 access token 가져오기
+  const accessToken = getAccessToken();
+
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
   return config;

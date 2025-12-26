@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "pages/index": "src/pages/index.ts",
+    "apis/auth": "src/apis/auth/index.ts",
   },
   format: ["cjs", "esm"],
   dts: {

@@ -3,7 +3,7 @@
     "name": "Guthub",
     "slug": "Guthub",
     "version": "1.0.0",
-    "scheme": "com.Guthub",
+    "scheme": "com.guthub",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,7 +22,10 @@
     "ios": {
       "supportsTablet": true,
       "icon": "./assets/icon.png",
-      "bundleIdentifier": "com.Guthub"
+      "bundleIdentifier": "com.Guthub",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +40,14 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e05ce36f-afc9-4d14-a4f2-967bbce77b46"
+      }
+    }
   }
 }

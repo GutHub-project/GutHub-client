@@ -3,16 +3,25 @@
   "version": "0.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "react-native": "./src/index.ts",
   "exports": {
     ".": {
+      "react-native": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
     "./pages": {
+      "react-native": "./src/pages/index.ts",
       "types": "./dist/pages/index.d.ts",
       "import": "./dist/pages/index.mjs",
       "require": "./dist/pages/index.js"
+    },
+    "./apis/auth": {
+      "react-native": "./src/apis/auth/index.ts",
+      "types": "./dist/apis/auth.d.ts",
+      "import": "./dist/apis/auth.mjs",
+      "require": "./dist/apis/auth.js"
     }
   },
   "scripts": {

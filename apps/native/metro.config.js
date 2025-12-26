@@ -17,10 +17,36 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
-// 3. Enable package exports support
-config.resolver.unstable_enablePackageExports = true;
+// 3. Force resolve workspace packages to their source files
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Handle @repo packages by pointing to their source
+  if (moduleName === '@repo/user/components') {
+    return {
+      filePath: path.resolve(workspaceRoot, 'packages/user/src/components/index.ts'),
+      type: 'sourceFile',
+    };
+  }
+  if (moduleName === '@repo/user/hooks') {
+    return {
+      filePath: path.resolve(workspaceRoot, 'packages/user/src/hooks/index.ts'),
+      type: 'sourceFile',
+    };
+  }
+  if (moduleName === '@repo/main-feature/apis/auth') {
+    return {
+      filePath: path.resolve(workspaceRoot, 'packages/main-feature/src/apis/auth/index.ts'),
+      type: 'sourceFile',
+    };
+  }
 
-// 4. Disable hierarchical lookup to prevent pnpm issues
+  // Fallback to default resolver
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+// 4. Disable package exports (we're manually resolving)
+config.resolver.unstable_enablePackageExports = false;
+
+// 5. Disable hierarchical lookup to prevent pnpm issues
 config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;
