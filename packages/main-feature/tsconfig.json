@@ -2,7 +2,6 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "skipLibCheck": true,
     "types": ["node"],
     "jsx": "react-jsx",
@@ -13,12 +12,13 @@
     "target": "ES2020",
     "declarationMap": true,
     "paths": {
-      "@repo/shared": ["../shared/dist/index.d.ts"],
-      "@repo/shared/*": ["../shared/dist/*"]
+      "@repo/shared": ["../shared/src"],
+      "@repo/shared/*": ["../shared/src/*"]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "moduleResolution": "bundler"
   },
-  "include": ["src/**/*", "src/**/*.tsx", "../../global.d.ts"],
+  "include": ["src/**/*", "../shared/src", "../../global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
 

@@ -1,5 +1,9 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
+import { storage } from '../utils/storage';
 import type { AuthStore, UserProfile } from '../types';
+
+const isNative = Platform.OS !== 'web';
 
 /**
  * 인증 상태 관리를 위한 Zustand Store
@@ -19,7 +23,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: false,
 
   // 액션: 액세스 토큰 설정
-  setAccessToken: (accessToken: string) => {
+  setAccessToken: async (accessToken: string) => {
+    try {
+      await storage.setAccessToken(accessToken);
+    } catch (error) {
+      console.error('[AuthStore] Failed to save accessToken:', error);
+    }
     set({
       accessToken,
       isAuthenticated: true,
@@ -32,7 +41,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   // 액션: 인증 정보 초기화
-  clearAuth: () => {
+  clearAuth: async () => {
+    try {
+      await storage.removeAccessToken();
+    } catch (error) {
+      console.error('[AuthStore] Failed to remove accessToken:', error);
+    }
     set({
       accessToken: null,
       user: null,
@@ -41,24 +55,35 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   // 액션: 로그인 (액세스 토큰 + 사용자 정보 저장)
-  login: (response: { accessToken: string; userId: string; email: string; name: string; profileImage?: string }) => {
+  login: async (response: { accessToken: string; userId?: string; email?: string; name?: string; profileImage?: string }) => {
     const { accessToken, userId, email, name, profileImage } = response;
+
+    try {
+      await storage.setAccessToken(accessToken);
+    } catch (error) {
+      console.error('[AuthStore] Failed to save accessToken:', error);
+    }
 
     set({
       accessToken,
-      user: {
-        nickname: name || '',
+      user: name ? {
+        nickname: name,
         ageRange: '', // TODO: 응답에서 받아오도록 수정
         gender: '', // TODO: 응답에서 받아오도록 수정
         gutType: '', // TODO: 응답에서 받아오도록 수정
-      },
+      } : null,
       isAuthenticated: true,
       isLoading: false,
     });
   },
 
   // 액션: 로그아웃 (상태 초기화)
-  logout: () => {
+  logout: async () => {
+    try {
+      await storage.removeAccessToken();
+    } catch (error) {
+      console.error('[AuthStore] Failed to remove accessToken:', error);
+    }
     set({
       accessToken: null,
       user: null,
@@ -72,6 +97,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ isLoading });
   },
 }));
+
+// 초기 토큰 로드 함수
+export const initializeAuth = async () => {
+  try {
+    const accessToken = await storage.getAccessToken();
+    if (accessToken) {
+      useAuthStore.getState().setAccessToken(accessToken);
+    }
+  } catch (error) {
+    console.error('[AuthStore] Failed to load accessToken:', error);
+  }
+};
 
 // 액세스 토큰 가져오기 헬퍼 함수
 export const getAccessToken = () => useAuthStore.getState().accessToken;

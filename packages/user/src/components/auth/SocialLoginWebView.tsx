@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Modal, StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { WebViewNavigation } from 'react-native-webview';
 import { colors } from '@repo/tailwind-config/colors';
@@ -82,12 +82,38 @@ export const SocialLoginWebView = ({
         <WebView
           source={{ uri: loginUrl }}
           onNavigationStateChange={handleNavigationStateChange}
-          onLoadStart={() => setLoading(true)}
-          onLoadEnd={() => setLoading(false)}
+          onLoadStart={() => {
+            console.log('[SocialLoginWebView] Load Start:', loginUrl);
+            setLoading(true);
+          }}
+          onLoadEnd={() => {
+            console.log('[SocialLoginWebView] Load End');
+            setLoading(false);
+          }}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('[SocialLoginWebView] WebView Error: ', nativeEvent);
+            Alert.alert(
+              '웹뷰 로딩 에러',
+              `URL: ${nativeEvent.url}\n에러: ${nativeEvent.description}\n코드: ${nativeEvent.code}`,
+              [{ text: '확인', onPress: onClose }]
+            );
+          }}
+          onHttpError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('[SocialLoginWebView] HTTP Error: ', nativeEvent);
+            Alert.alert(
+              '서버 응답 에러 (HTTP)',
+              `상태 코드: ${nativeEvent.statusCode}\nURL: ${nativeEvent.url}`,
+              [{ text: '확인', onPress: onClose }]
+            );
+          }}
           style={styles.webview}
           // 쿠키 활성화 (refreshToken 쿠키 수신)
           sharedCookiesEnabled={true}
           thirdPartyCookiesEnabled={true}
+          // 구글 로그인 대응을 위한 userAgent 설정
+          userAgent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36"
         />
       </View>
     </Modal>

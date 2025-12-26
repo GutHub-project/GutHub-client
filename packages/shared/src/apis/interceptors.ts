@@ -1,6 +1,6 @@
+import axios from 'axios';
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { privateApiInstance } from './instance';
-import { getAccessToken } from '../stores';
+import { getAccessToken, useAuthStore } from '../stores';
 
 // access token 헤더에 추가
 export const requestInterceptor = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
@@ -41,15 +41,17 @@ interface ErrorResponse {
 }
 
 // refresh token 재요청 로직 필요
-export const errorInterceptor = async (error: AxiosError<ErrorResponse>): Promise<void> => {
+export const errorInterceptor = async (error: AxiosError<ErrorResponse>): Promise<any> => {
   const { config } = error;
 
   if (!config) {
     throw new Error('요청이 잘못되었습니다.');
   }
 
-  const handleLogout = (message: string) => {
-    return Promise.reject(message);
+  const handleLogout = async (message: string) => {
+    const { logout } = useAuthStore.getState();
+    await logout();
+    return Promise.reject(new ApiError(401, message));
   };
 
   if (error.response?.status === 500) {
@@ -62,27 +64,37 @@ export const errorInterceptor = async (error: AxiosError<ErrorResponse>): Promis
     return Promise.reject(new ApiError(404, '', error.response.data));
   }
 
-  if (error.response?.status === 403) {
-    const { code } = error.response.data;
+  // 백엔드 설계에 따라 Access Token 만료 시 400 에러 반환
+  if (error.response?.status === 400) {
+    const isRefreshRequest = config.url?.includes('/auth/refresh');
 
-    if (code === 'ET') {
-      const isRefreshRequest = config.url?.includes('/refresh');
-
-      if (isRefreshRequest) {
-        return Promise.reject(error);
-      }
-
-      try {
-        const response = await privateApiInstance.get('/refresh');
-        const newAccessToken = response.data.accessToken;
-
-        config.headers.Authorization = `Bearer ${newAccessToken}`;
-        return privateApiInstance(config);
-      } catch {
-        return handleLogout('세션이 만료되었습니다. 다시 로그인해주세요.');
-      }
+    if (isRefreshRequest) {
+      return handleLogout('세션이 만료되었습니다. 다시 로그인해주세요.');
     }
 
+    try {
+      // /auth/refresh API 호출 (withCredentials: true로 쿠키의 Refresh Token 전송)
+      // 순환 참조 방지를 위해 axios 직접 사용
+      const baseURL = config.baseURL || '';
+      const refreshUrl = baseURL.endsWith('/') ? 'auth/refresh' : '/auth/refresh';
+      
+      const response = await axios.get(`${baseURL}${refreshUrl}`, {
+        withCredentials: true,
+      });
+      const newAccessToken = response.data.accessToken;
+
+      // 새 토큰 저장
+      await useAuthStore.getState().setAccessToken(newAccessToken);
+
+      // 이전 요청 재시도
+      config.headers.Authorization = `Bearer ${newAccessToken}`;
+      return axios(config);
+    } catch (refreshError) {
+      return handleLogout('세션이 만료되었습니다. 다시 로그인해주세요.');
+    }
+  }
+
+  if (error.response?.status === 403) {
     return handleLogout('권한이 없습니다. 로그인 페이지로 이동합니다.');
   }
 

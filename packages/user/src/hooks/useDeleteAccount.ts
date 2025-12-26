@@ -1,5 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import CookieManager from '@react-native-cookies/cookies';
+import { Platform } from 'react-native';
+import { useAuthStore } from '@repo/shared';
 import { userApi } from '../apis';
+
+const isNative = Platform.OS !== 'web';
 
 /**
  * 회원 탈퇴 Hook
@@ -25,12 +30,21 @@ import { userApi } from '../apis';
  */
 export const useDeleteAccount = () => {
   const queryClient = useQueryClient();
+  const { logout: clearAuthState } = useAuthStore();
 
   return useMutation({
     mutationFn: () => userApi.deleteAccount(),
-    onSuccess: () => {
+    onSuccess: async () => {
       // 모든 쿼리 캐시 초기화
       queryClient.clear();
+
+      // 쿠키 삭제
+      if (isNative) {
+        await CookieManager.clearAll();
+      }
+
+      // 로컬 인증 데이터 초기화
+      await clearAuthState();
     },
   });
 };

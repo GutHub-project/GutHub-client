@@ -1,14 +1,15 @@
-import { QueryProvider, useAuthStore } from '@repo/shared';
+import { QueryProvider, useAuthStore, initializeAuth } from '@repo/shared';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Linking from 'expo-linking';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
 const AppLayout = () => {
+  const [isReady, setIsReady] = useState(false);
   const [loaded, error] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.ttf'),
     'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.ttf'),
@@ -25,6 +26,15 @@ const AppLayout = () => {
   const segments = useSegments();
   const router = useRouter();
 
+  // 초기 인증 정보 로드
+  useEffect(() => {
+    const init = async () => {
+      await initializeAuth();
+      setIsReady(true);
+    };
+    init();
+  }, []);
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -39,8 +49,8 @@ const AppLayout = () => {
       const { hostname, queryParams } = parsedUrl;
 
       // com.guthub://auth-callback?accessToken=xxx&refreshToken=xxx (기존 회원)
-      if (hostname === 'auth-callback') {
-        const { accessToken, refreshToken } = queryParams;
+      if (hostname === 'auth-callback' && queryParams) {
+        const accessToken = queryParams.accessToken as string | undefined;
 
         if (accessToken) {
           console.log('[Deep Link] 로그인 성공');
@@ -49,8 +59,8 @@ const AppLayout = () => {
         }
       }
       // com.guthub://profile-setup?tempToken=xxx (신규 회원)
-      else if (hostname === 'profile-setup') {
-        const { tempToken } = queryParams;
+      else if (hostname === 'profile-setup' && queryParams) {
+        const tempToken = queryParams.tempToken as string | undefined;
 
         if (tempToken) {
           console.log('[Deep Link] 회원가입 필요');
@@ -86,7 +96,7 @@ const AppLayout = () => {
   }, [loaded]);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !isReady) return;
 
     const inAuthGroup = segments[0] === 'login';
 
@@ -95,9 +105,9 @@ const AppLayout = () => {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/');
     }
-  }, [isAuthenticated, segments, router, loaded]);
+  }, [isAuthenticated, segments, router, loaded, isReady]);
 
-  if (!loaded) {
+  if (!loaded || !isReady) {
     return null;
   }
 

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 export default function WebViewContainer({ baseURL }: { baseURL: string }) {
@@ -42,6 +43,17 @@ export default function WebViewContainer({ baseURL }: { baseURL: string }) {
       bounces={false}
       source={{ uri: baseURL }}
       onMessage={requestOnMessage}
+      onError={(syntheticEvent) => {
+        const { nativeEvent } = syntheticEvent;
+        Alert.alert('메인 웹뷰 에러', `URL: ${nativeEvent.url}\n에러: ${nativeEvent.description}`);
+      }}
+      onHttpError={(syntheticEvent) => {
+        const { nativeEvent } = syntheticEvent;
+        Alert.alert('메인 HTTP 에러', `상태 코드: ${nativeEvent.statusCode}`);
+      }}
+      startInLoadingState={true}
+      javaScriptEnabled={true}
+      domStorageEnabled={true}
     />
   );
 }

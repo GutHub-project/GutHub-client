@@ -38,6 +38,12 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       type: 'sourceFile',
     };
   }
+  if (moduleName === '@repo/shared') {
+    return {
+      filePath: path.resolve(workspaceRoot, 'packages/shared/src/index.ts'),
+      type: 'sourceFile',
+    };
+  }
 
   // Fallback to default resolver
   return context.resolveRequest(context, moduleName, platform);

@@ -24,8 +24,17 @@ export const LoginScreen = () => {
    */
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
     const url = authApi.getSocialLoginUrl(provider);
-    console.log(`[LoginScreen] ${provider} 로그인 URL:`, url);
-    setLoginUrl(url);
+    console.log(`[LoginScreen] ${provider} 로그인 시도 URL:`, url);
+    
+    if (!url || url.startsWith('undefined') || url.startsWith('/')) {
+      console.error('[LoginScreen] 유효하지 않은 로그인 URL입니다. BASE_URL 설정을 확인하세요.');
+      // 폴백 URL 설정 (마지막 수단)
+      const fallbackUrl = `https://api.guthub.shop/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent('com.guthub://auth-callback')}`;
+      setLoginUrl(fallbackUrl);
+    } else {
+      setLoginUrl(url);
+    }
+    
     setWebViewVisible(true);
   };
 

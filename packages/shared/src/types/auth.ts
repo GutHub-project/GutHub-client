@@ -4,9 +4,9 @@ export type SocialProvider = 'google' | 'kakao' | 'naver';
 // 소셜 로그인 응답 타입
 export interface AuthResponse {
   accessToken: string;
-  userId: string;
-  email: string;
-  name: string;
+  userId?: string;
+  email?: string;
+  name?: string;
   profileImage?: string;
 }
 
@@ -38,11 +38,11 @@ export interface AuthState {
 
 // Auth Store 액션 타입
 export interface AuthActions {
-  setAccessToken: (accessToken: string) => void;
+  setAccessToken: (accessToken: string) => void | Promise<void>;
   setUser: (user: UserProfile) => void;
-  clearAuth: () => void;
-  login: (response: AuthResponse) => void;
-  logout: () => void;
+  clearAuth: () => void | Promise<void>;
+  login: (response: AuthResponse) => void | Promise<void>;
+  logout: () => void | Promise<void>;
   setLoading: (isLoading: boolean) => void;
 }
 

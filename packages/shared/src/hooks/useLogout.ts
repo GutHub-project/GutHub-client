@@ -1,5 +1,9 @@
 import { useState } from 'react';
+import CookieManager from '@react-native-cookies/cookies';
+import { Platform } from 'react-native';
 import { useAuthStore } from '../stores';
+
+const isNative = Platform.OS !== 'web';
 
 /**
  * 로그아웃 훅
@@ -27,8 +31,13 @@ export const useLogout = (authApi: { logout: () => Promise<void> }) => {
       // 서버에 로그아웃 요청
       await authApi.logout();
 
-      // 로컬 상태 초기화
-      clearAuthState();
+      // 쿠키 삭제 (Refresh Token 삭제)
+      if (isNative) {
+        await CookieManager.clearAll();
+      }
+
+      // 로컬 상태 초기화 (Access Token 삭제 포함)
+      await clearAuthState();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : '로그아웃에 실패했습니다.';
