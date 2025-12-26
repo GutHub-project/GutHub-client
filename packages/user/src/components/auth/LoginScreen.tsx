@@ -1,7 +1,7 @@
-import { View, StyleSheet } from 'react-native';
-import { useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { Text, useAuthStore } from '@repo/shared';
+import { Text, useAuthStore, BASE_URL } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
 import { authApi } from '@repo/main-feature/apis/auth';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -18,6 +18,15 @@ export const LoginScreen = () => {
   const { login: setAuthState } = useAuthStore();
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [loginUrl, setLoginUrl] = useState('');
+
+  // 디버깅용: 현재 설정된 BASE_URL 확인
+  useEffect(() => {
+    console.log('[LoginScreen] Current BASE_URL:', BASE_URL);
+    if (__DEV__) {
+      // 개발 모드에서만 알림 (필요시 주석 해제)
+      // Alert.alert('Debug', `BASE_URL: ${BASE_URL}`);
+    }
+  }, []);
 
   /**
    * 소셜 로그인 버튼 클릭 핸들러

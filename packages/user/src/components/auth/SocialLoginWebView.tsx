@@ -41,7 +41,11 @@ export const SocialLoginWebView = ({
       const timer = setTimeout(() => {
         setLoading((prev) => {
           if (prev) {
-            Alert.alert('로딩 지연', '서버 응답이 없습니다. 네트워크 상태나 서버 주소를 확인해주세요.');
+            Alert.alert(
+              '로딩 지연',
+              `서버 응답이 없습니다.\n\n접속 시도 URL:\n${loginUrl}\n\n네트워크 상태나 서버 주소를 확인해주세요.`,
+              [{ text: '확인', onPress: onClose }]
+            );
             return false;
           }
           return false;

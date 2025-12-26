@@ -3,7 +3,7 @@ import { errorInterceptor, requestInterceptor, successInterceptor } from './inte
 
 // .env.production의 BASE_URL 또는 환경변수 사용
 // 우선순위: BASE_URL (네이티브/Node.js) > NEXT_PUBLIC_API_URL (Next.js) > VITE_BASE_URL (Vite) > 기본값
-let BASE_URL: string = 'https://api.guthub.shop'; // 기본값을 프로덕션으로 설정
+let BASE_URL: string = 'http://api.guthub.shop:8080'; // 기본값을 실제 백엔드 주소로 설정
 
 // 1. 빌드 타임에 환경변수 체크 (Web/Node.js)
 if (typeof process !== 'undefined' && process.env) {
