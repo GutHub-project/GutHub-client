@@ -21,7 +21,18 @@ export default defineConfig({
     js: "'use client';",
   },
   clean: true,
-  external: ["react", "react-dom", "react-native", "axios", "zustand", "@tanstack/react-query", "next", "tailwind-merge"],
+  external: [
+    "react",
+    "react-dom",
+    "react-native",
+    "axios",
+    "zustand",
+    "@tanstack/react-query",
+    "next",
+    "tailwind-merge",
+    "@react-native-cookies/cookies",
+    "react-native-encrypted-storage"
+  ],
   injectStyle: true,
 });
 

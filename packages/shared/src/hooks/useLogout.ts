@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import CookieManager from '@react-native-cookies/cookies';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../stores';
 
-const isNative = Platform.OS !== 'web';
+// @ts-ignore
+const getCookieManager = () => {
+  if (Platform.OS !== 'web') {
+    try {
+      return require('@react-native-cookies/cookies').default;
+    } catch (e) {
+      console.error('Failed to load CookieManager', e);
+      return null;
+    }
+  }
+  return null;
+};
 
 /**
  * 로그아웃 훅
@@ -32,8 +42,11 @@ export const useLogout = (authApi: { logout: () => Promise<void> }) => {
       await authApi.logout();
 
       // 쿠키 삭제 (Refresh Token 삭제)
-      if (isNative) {
-        await CookieManager.clearAll();
+      if (Platform.OS !== 'web') {
+        const CookieManager = getCookieManager();
+        if (CookieManager) {
+          await CookieManager.clearAll();
+        }
       }
 
       // 로컬 상태 초기화 (Access Token 삭제 포함)
