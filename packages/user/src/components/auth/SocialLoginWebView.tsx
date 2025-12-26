@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Modal, StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Modal, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { WebViewNavigation } from 'react-native-webview';
 import { colors } from '@repo/tailwind-config/colors';
@@ -25,6 +25,32 @@ export const SocialLoginWebView = ({
   onClose,
 }: SocialLoginWebViewProps) => {
   const [loading, setLoading] = useState(true);
+
+  // 디버깅 및 타임아웃 처리
+  useEffect(() => {
+    if (visible) {
+      setLoading(true);
+      console.log('[SocialLoginWebView] Opening with URL:', loginUrl);
+      
+      // URL이 이상하면 즉시 알림
+      if (!loginUrl || loginUrl.includes('undefined')) {
+        Alert.alert('URL 오류', `잘못된 주소입니다: ${loginUrl}`);
+      }
+
+      // 20초 후에도 로딩 중이면 타임아웃 알림
+      const timer = setTimeout(() => {
+        setLoading((prev) => {
+          if (prev) {
+            Alert.alert('로딩 지연', '서버 응답이 없습니다. 네트워크 상태나 서버 주소를 확인해주세요.');
+            return false;
+          }
+          return false;
+        });
+      }, 20000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [visible, loginUrl]);
 
   /**
    * WebView 네비게이션 상태 변경 감지
@@ -74,9 +100,15 @@ export const SocialLoginWebView = ({
       onRequestClose={onClose}
     >
       <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>닫기</Text>
+          </TouchableOpacity>
+        </View>
         {loading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.main} />
+            <Text style={styles.loadingText}>페이지를 불러오는 중...</Text>
           </View>
         )}
         <WebView
@@ -125,16 +157,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
+  header: {
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginTop: 40, // 상태바 고려
+  },
+  closeButton: {
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: colors.main,
+    fontWeight: 'bold',
+  },
   loadingContainer: {
     position: 'absolute',
-    top: 0,
+    top: 50,
     left: 0,
     right: 0,
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     zIndex: 1,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: colors.text,
   },
   webview: {
     flex: 1,
