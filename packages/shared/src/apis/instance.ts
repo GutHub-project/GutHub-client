@@ -3,15 +3,33 @@ import { errorInterceptor, requestInterceptor, successInterceptor } from './inte
 
 // .env.production의 BASE_URL 또는 환경변수 사용
 // 우선순위: BASE_URL (네이티브/Node.js) > NEXT_PUBLIC_API_URL (Next.js) > VITE_BASE_URL (Vite) > 기본값
-// React Native에서는 react-native-dotenv를 통해 빌드 타임에 process.env.BASE_URL이 주입됨
-let BASE_URL;
+let BASE_URL: string = 'https://api.guthub.shop'; // 기본값을 프로덕션으로 설정
 
-// 빌드 타임에 환경변수 체크
+// 1. 빌드 타임에 환경변수 체크 (Web/Node.js)
 if (typeof process !== 'undefined' && process.env) {
-  BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_API_URL || process.env.VITE_BASE_URL || BASE_URL;
+  const envUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_API_URL || process.env.VITE_BASE_URL;
+  if (envUrl) {
+    BASE_URL = envUrl;
+  }
 }
 
-console.log('[API Instance] Using BASE_URL:', BASE_URL);
+// 2. React Native에서 react-native-dotenv를 사용하는 경우 @env 모듈 확인
+try {
+  // @ts-ignore
+  const env = require('@env');
+  if (env && env.BASE_URL) {
+    BASE_URL = env.BASE_URL;
+  }
+} catch (e) {
+  // @env 모듈이 없는 경우 무시
+}
+
+// 3. URL 형식 검증 (슬래시 중복 방지 등)
+if (BASE_URL.endsWith('/')) {
+  BASE_URL = BASE_URL.slice(0, -1);
+}
+
+console.log('[API Instance] Final BASE_URL:', BASE_URL);
 
 const createAxiosInstance = (baseURL: string, headers: { [key: string]: string }): AxiosInstance => {
   return axios.create({
@@ -52,7 +70,7 @@ const createApiInstance = (
 };
 
 export const publicApiInstance = createApiInstance(
-  BASE_URL,
+  BASE_URL as string,
   {
     'Content-Type': 'application/json',
   },
@@ -60,7 +78,7 @@ export const publicApiInstance = createApiInstance(
 );
 
 export const privateApiInstance = createApiInstance(
-  BASE_URL,
+  BASE_URL as string,
   {
     'Content-Type': 'application/json',
   },
@@ -68,7 +86,7 @@ export const privateApiInstance = createApiInstance(
 );
 
 export const formDataApiInstance = createApiInstance(
-  BASE_URL,
+  BASE_URL as string,
   {
     'Content-Type': 'multipart/form-data',
   },
