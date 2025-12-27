@@ -22,12 +22,19 @@ if (typeof process !== 'undefined' && process.env) {
 try {
   // @ts-ignore
   const env = require('@env');
+  console.log('[API Instance] @env module loaded:', env);
   if (env) {
-    if (env.BASE_URL) BASE_URL = env.BASE_URL;
-    if (env.WEB_URL) WEB_URL = env.WEB_URL;
+    if (env.BASE_URL) {
+      console.log('[API Instance] Setting BASE_URL from @env:', env.BASE_URL);
+      BASE_URL = env.BASE_URL;
+    }
+    if (env.WEB_URL) {
+      console.log('[API Instance] Setting WEB_URL from @env:', env.WEB_URL);
+      WEB_URL = env.WEB_URL;
+    }
   }
 } catch (e) {
-  // @env 모듈이 없는 경우 무시
+  console.log('[API Instance] @env module not found, using defaults');
 }
 
 // 3. URL 형식 검증 (슬래시 중복 방지 등)

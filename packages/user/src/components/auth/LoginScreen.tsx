@@ -3,7 +3,7 @@ import { Text, useAuthStore, BASE_URL } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
 
 import { SocialLoginButtons } from './SocialLoginButtons';
 import { SocialLoginWebView } from './SocialLoginWebView';
@@ -36,6 +36,14 @@ export const LoginScreen = () => {
     const url = authApi.getSocialLoginUrl();
     console.log(`[LoginScreen] 로그인 시도 URL:`, url);
 
+    // 웹 환경에서는 직접 WEB_URL로 리다이렉트
+    if (Platform.OS === 'web') {
+      console.log('[LoginScreen] Web platform detected, redirecting to:', url);
+      window.location.href = url;
+      return;
+    }
+
+    // 네이티브 환경에서는 WebView 사용
     // 디버깅용: 생성된 URL 확인
     Alert.alert(
       '로그인 시도',
