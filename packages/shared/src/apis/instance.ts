@@ -1,22 +1,41 @@
 import axios, { AxiosInstance } from 'axios';
 import { errorInterceptor, requestInterceptor, successInterceptor } from './interceptors';
 
-// .env.production의 BASE_URL 또는 환경변수 사용
-// 우선순위: BASE_URL (네이티브/Node.js) > NEXT_PUBLIC_API_URL (Next.js) > VITE_BASE_URL (Vite) > 기본값
-let BASE_URL: string = 'http://api.guthub.shop:8080'; // 기본값을 실제 백엔드 주소로 설정
-let WEB_URL: string = 'https://guthub.shop'; // 기본값을 실제 웹 주소로 설정
+// 기본값
+const DEFAULT_BASE_URL = 'http://api.guthub.shop:8080';
+const DEFAULT_WEB_URL = 'https://guthub.shop';
 
-// 1. 빌드 타임에 환경변수 체크 (Web/Node.js)
-if (typeof process !== 'undefined' && process.env) {
-  const envUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_API_URL || process.env.VITE_BASE_URL;
-  if (envUrl) {
-    BASE_URL = envUrl;
+// 환경변수 가져오기 - Next.js에서는 NEXT_PUBLIC_ 접두사 필수
+const getBaseUrl = (): string => {
+  // Next.js 환경변수 (브라우저에서도 접근 가능)
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
-  const webUrl = process.env.WEB_URL || process.env.NEXT_PUBLIC_WEB_URL;
-  if (webUrl) {
-    WEB_URL = webUrl;
+  // Node.js 환경변수
+  if (typeof process !== 'undefined' && process.env?.BASE_URL) {
+    return process.env.BASE_URL;
   }
-}
+  // Vite 환경변수
+  if (typeof process !== 'undefined' && process.env?.VITE_BASE_URL) {
+    return process.env.VITE_BASE_URL;
+  }
+  return DEFAULT_BASE_URL;
+};
+
+const getWebUrl = (): string => {
+  // Next.js 환경변수 (브라우저에서도 접근 가능)
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_WEB_URL) {
+    return process.env.NEXT_PUBLIC_WEB_URL;
+  }
+  // Node.js 환경변수
+  if (typeof process !== 'undefined' && process.env?.WEB_URL) {
+    return process.env.WEB_URL;
+  }
+  return DEFAULT_WEB_URL;
+};
+
+let BASE_URL: string = getBaseUrl();
+let WEB_URL: string = getWebUrl();
 
 // 2. React Native에서 react-native-dotenv를 사용하는 경우 @env 모듈 확인
 try {
@@ -49,6 +68,7 @@ console.log('[API Instance] Final BASE_URL:', BASE_URL);
 console.log('[API Instance] Final WEB_URL:', WEB_URL);
 
 const createAxiosInstance = (baseURL: string, headers: { [key: string]: string }): AxiosInstance => {
+  console.log('[createAxiosInstance] Creating instance with baseURL:', baseURL);
   return axios.create({
     baseURL,
     headers: {
