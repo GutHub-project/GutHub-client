@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 /**
  * 프로필 설정 페이지 (신규 회원)
@@ -169,7 +169,7 @@ export default function ProfileSetupPage() {
 
         {/* 닉네임 */}
         <div style={{ marginBottom: '32px' }}>
-          <label style={{
+          <label htmlFor="nickname" style={{
             display: 'block',
             fontWeight: '600',
             marginBottom: '12px',
@@ -185,6 +185,7 @@ export default function ProfileSetupPage() {
             alignItems: 'center',
           }}>
             <input
+              id="nickname"
               type="text"
               placeholder="김허브 |"
               value={formData.nickname}
@@ -219,7 +220,7 @@ export default function ProfileSetupPage() {
 
         {/* 연령대 */}
         <div style={{ marginBottom: '32px' }}>
-          <label style={{
+          <div style={{
             display: 'block',
             fontWeight: '600',
             marginBottom: '12px',
@@ -227,7 +228,7 @@ export default function ProfileSetupPage() {
             color: '#000',
           }}>
             연령대
-          </label>
+          </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {ageOptions.map((age) => (
               <button
@@ -254,7 +255,7 @@ export default function ProfileSetupPage() {
 
         {/* 성별 */}
         <div style={{ marginBottom: '32px' }}>
-          <label style={{
+          <div style={{
             display: 'block',
             fontWeight: '600',
             marginBottom: '12px',
@@ -262,7 +263,7 @@ export default function ProfileSetupPage() {
             color: '#000',
           }}>
             성별
-          </label>
+          </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {genderOptions.map((option) => (
               <button
@@ -289,7 +290,7 @@ export default function ProfileSetupPage() {
 
         {/* 장건강 유형 */}
         <div style={{ marginBottom: '40px' }}>
-          <label style={{
+          <div style={{
             display: 'block',
             fontWeight: '600',
             marginBottom: '12px',
@@ -297,7 +298,7 @@ export default function ProfileSetupPage() {
             color: '#000',
           }}>
             장건강 유형
-          </label>
+          </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {gutTypeOptions.map((option) => (
               <button
