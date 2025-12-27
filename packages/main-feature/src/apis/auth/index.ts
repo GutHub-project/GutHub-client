@@ -10,13 +10,15 @@ import type {
  */
 export const authApi = {
   /**
-   * 웹뷰에 띄울 URL 반환 (하이브리드 웹앱)
-   * @returns 웹뷰에 띄울 웹 URL
+   * 소셜 로그인 OAuth URL 생성 (백엔드 직접 호출)
+   * @param provider - 소셜 로그인 제공자 (naver, google, kakao)
+   * @returns 백엔드 OAuth URL
    */
-  getSocialLoginUrl: (): string => {
-    console.log('[authApi] Using WEB_URL:', WEB_URL);
-    // 하이브리드 웹앱 - 메인 페이지
-    return WEB_URL;
+  getSocialLoginUrl: (provider: 'naver' | 'google' | 'kakao'): string => {
+    console.log('[authApi] Using BASE_URL:', BASE_URL);
+    // 백엔드 OAuth URL 직접 반환
+    const redirectUri = encodeURIComponent(`${WEB_URL}/login/success`);
+    return `${BASE_URL}/oauth2/authorization/${provider}?redirect_uri=${redirectUri}`;
   },
 
   /**

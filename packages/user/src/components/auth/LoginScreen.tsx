@@ -32,43 +32,20 @@ export const LoginScreen = () => {
   /**
    * 소셜 로그인 버튼 클릭 핸들러
    */
-  const handleSocialLogin = () => {
-    const url = authApi.getSocialLoginUrl();
-    console.log(`[LoginScreen] 로그인 시도 URL:`, url);
+  const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
+    const url = authApi.getSocialLoginUrl(provider);
+    console.log(`[LoginScreen] ${provider} 로그인 시도 URL:`, url);
 
-    // 웹 환경에서는 직접 WEB_URL로 리다이렉트
+    // 웹 환경에서는 직접 OAuth URL로 리다이렉트
     if (Platform.OS === 'web') {
       console.log('[LoginScreen] Web platform detected, redirecting to:', url);
       window.location.href = url;
       return;
     }
 
-    // 네이티브 환경에서는 WebView 사용
-    // 디버깅용: 생성된 URL 확인
-    Alert.alert(
-      '로그인 시도',
-      `접속 주소: ${url}`,
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: '접속',
-          onPress: () => {
-            if (!url || url.startsWith('undefined') || url.startsWith('/')) {
-              console.error('[LoginScreen] 유효하지 않은 로그인 URL입니다. WEB_URL 설정을 확인하세요.');
-              // 폴백 URL 설정 (마지막 수단)
-              const fallbackUrl = 'https://guthub.shop';
-              setLoginUrl(fallbackUrl);
-            } else {
-              setLoginUrl(url);
-            }
-            setWebViewVisible(true);
-          }
-        }
-      ]
-    );
+    // 네이티브 환경에서는 WebView로 백엔드 OAuth URL 로드
+    setLoginUrl(url);
+    setWebViewVisible(true);
   };
 
   /**
@@ -94,15 +71,15 @@ export const LoginScreen = () => {
   };
 
   const handleGoogleLogin = () => {
-    handleSocialLogin();
+    handleSocialLogin('google');
   };
 
   const handleKakaoLogin = () => {
-    handleSocialLogin();
+    handleSocialLogin('kakao');
   };
 
   const handleNaverLogin = () => {
-    handleSocialLogin();
+    handleSocialLogin('naver');
   };
 
   return (

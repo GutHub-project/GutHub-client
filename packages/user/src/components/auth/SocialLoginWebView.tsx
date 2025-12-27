@@ -2,7 +2,6 @@ import { colors } from '@repo/tailwind-config/colors';
 import { useState, useEffect } from 'react';
 import { Modal, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
-import type { WebViewNavigation } from 'react-native-webview';
 
 interface SocialLoginWebViewProps {
   visible: boolean;
@@ -57,12 +56,11 @@ export const SocialLoginWebView = ({
   }, [visible, loginUrl]);
 
   /**
-   * WebView 네비게이션 상태 변경 감지
+   * WebView URL 로드 전 가로채기 (리다이렉트 URL 감지)
    */
-  const handleNavigationStateChange = (navState: WebViewNavigation) => {
-    const { url } = navState;
-
-    console.log('[SocialLoginWebView] Navigation URL:', url);
+  const handleShouldStartLoad = (request: { url: string }) => {
+    const { url } = request;
+    console.log('[SocialLoginWebView] Should start load URL:', url);
 
     // 기존 회원 - /login/success로 리다이렉트
     if (url.includes('/login/success')) {
@@ -74,6 +72,7 @@ export const SocialLoginWebView = ({
           console.log('[SocialLoginWebView] 로그인 성공');
           onSuccess(accessToken);
           onClose();
+          return false; // URL 로드 중단
         }
       } catch (error) {
         console.error('[SocialLoginWebView] URL 파싱 실패:', error);
@@ -89,11 +88,14 @@ export const SocialLoginWebView = ({
           console.log('[SocialLoginWebView] 회원가입 필요');
           onSignupRequired(tempToken);
           onClose();
+          return false; // URL 로드 중단
         }
       } catch (error) {
         console.error('[SocialLoginWebView] URL 파싱 실패:', error);
       }
     }
+
+    return true; // 다른 URL은 정상 로드
   };
 
   return (
@@ -117,7 +119,7 @@ export const SocialLoginWebView = ({
         )}
         <WebView
           source={{ uri: loginUrl }}
-          onNavigationStateChange={handleNavigationStateChange}
+          onShouldStartLoadWithRequest={handleShouldStartLoad}
           onLoadStart={() => {
             console.log('[SocialLoginWebView] Load Start:', loginUrl);
             setLoading(true);
