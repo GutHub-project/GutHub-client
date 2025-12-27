@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
+import { authApi, useAuthStore } from '@repo/shared';
 
 /**
  * 프로필 설정 페이지 (신규 회원)
@@ -10,6 +11,7 @@ import { useState, useEffect, Suspense } from 'react';
 function ProfileSetupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setAccessToken } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -44,24 +46,15 @@ function ProfileSetupContent() {
 
     try {
       setIsLoading(true);
+      console.log('[ProfileSetup] Submitting with tempToken:', tempToken);
+      console.log('[ProfileSetup] Form data:', formData);
 
-      // 회원가입 완료 API 호출
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/signup/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${tempToken}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+      // 회원가입 완료 API 호출 (공통 authApi 사용)
+      const data = await authApi.completeSignup(formData, tempToken);
 
-      if (!response.ok) {
-        throw new Error('프로필 설정 실패');
-      }
-
-      const data = await response.json();
-      localStorage.setItem('accessToken', data.accessToken);
+      // 액세스 토큰 저장 및 상태 업데이트
+      await setAccessToken(data.accessToken);
+      
       router.replace('/');
     } catch (error) {
       console.error('프로필 설정 중 오류:', error);

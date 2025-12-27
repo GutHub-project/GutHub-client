@@ -36,6 +36,7 @@ export const authApi = {
    * @returns 인증 토큰 및 사용자 정보
    */
   completeSignup: async (data: any, tempToken: string): Promise<AuthResponse> => {
+    console.log('[authApi] completeSignup called');
     const response = await publicApiInstance.post<AuthResponse>(
       '/auth/signup/complete',
       data,

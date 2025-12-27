@@ -106,29 +106,52 @@ const createApiInstance = (
   return instance;
 };
 
-export const publicApiInstance = createApiInstance(
-  BASE_URL as string,
-  {
-    'Content-Type': 'application/json',
-  },
-  { useResponseInterceptors: true },
-);
+// Lazy initialization to ensure BASE_URL is properly set
+let _publicApiInstance: AxiosInstance | null = null;
+let _privateApiInstance: AxiosInstance | null = null;
+let _formDataApiInstance: AxiosInstance | null = null;
 
-export const privateApiInstance = createApiInstance(
-  BASE_URL as string,
-  {
-    'Content-Type': 'application/json',
+export const publicApiInstance = new Proxy({} as AxiosInstance, {
+  get(target, prop) {
+    if (!_publicApiInstance) {
+      console.log('[publicApiInstance] Lazy initializing with BASE_URL:', BASE_URL);
+      _publicApiInstance = createApiInstance(
+        BASE_URL,
+        { 'Content-Type': 'application/json' },
+        { useResponseInterceptors: true },
+      );
+    }
+    return (_publicApiInstance as any)[prop];
   },
-  { useRequestInterceptors: true, useResponseInterceptors: true },
-);
+});
 
-export const formDataApiInstance = createApiInstance(
-  BASE_URL as string,
-  {
-    'Content-Type': 'multipart/form-data',
+export const privateApiInstance = new Proxy({} as AxiosInstance, {
+  get(target, prop) {
+    if (!_privateApiInstance) {
+      console.log('[privateApiInstance] Lazy initializing with BASE_URL:', BASE_URL);
+      _privateApiInstance = createApiInstance(
+        BASE_URL,
+        { 'Content-Type': 'application/json' },
+        { useRequestInterceptors: true, useResponseInterceptors: true },
+      );
+    }
+    return (_privateApiInstance as any)[prop];
   },
-  { useRequestInterceptors: true, useResponseInterceptors: true },
-);
+});
+
+export const formDataApiInstance = new Proxy({} as AxiosInstance, {
+  get(target, prop) {
+    if (!_formDataApiInstance) {
+      console.log('[formDataApiInstance] Lazy initializing with BASE_URL:', BASE_URL);
+      _formDataApiInstance = createApiInstance(
+        BASE_URL,
+        { 'Content-Type': 'multipart/form-data' },
+        { useRequestInterceptors: true, useResponseInterceptors: true },
+      );
+    }
+    return (_formDataApiInstance as any)[prop];
+  },
+});
 
 // BASE_URL과 WEB_URL을 export하여 다른 곳에서 사용 가능하도록 함
 export { BASE_URL, WEB_URL };
