@@ -78,22 +78,6 @@ export const SocialLoginWebView = ({
         console.error('[SocialLoginWebView] /login/success URL 파싱 실패:', error);
       }
     }
-    // 신규 회원 - /profile-setup으로 리다이렉트
-    else if (url.includes('/profile-setup')) {
-      try {
-        const urlObj = new URL(url);
-        const tempToken = urlObj.searchParams.get('tempToken');
-
-        if (tempToken) {
-          console.log('[SocialLoginWebView] 회원가입 필요, tempToken:', tempToken);
-          onSignupRequired(tempToken);
-          onClose();
-          return false; // URL 로드 중단
-        }
-      } catch (error) {
-        console.error('[SocialLoginWebView] /profile-setup URL 파싱 실패:', error);
-      }
-    }
 
     return true; // 다른 URL은 정상 로드
   };

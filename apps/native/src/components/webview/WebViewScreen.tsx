@@ -11,11 +11,9 @@ export default function WebViewScreen() {
   const { url } = useLocalSearchParams<{ url?: string }>();
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-        <View style={styles.webViewContainer}>
-          <WebViewContainer baseURL={`${WEBVIEW_PROPS.BASE_URL}${url ?? ''}`} />
-        </View>
-      </SafeAreaView>
+      <View style={styles.webViewContainer}>
+        <WebViewContainer baseURL={`${WEBVIEW_PROPS.BASE_URL}${url ?? ''}`} />
+      </View>
       <NavBar />
     </View>
   );
@@ -25,11 +23,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  safeArea: {
-    flex: 1,
-  },
   webViewContainer: {
     flex: 1,
-    paddingBottom: WEBVIEW_PROPS.BOTTOM_BAR_HEIGHT,
+    marginBottom: WEBVIEW_PROPS.BOTTOM_BAR_HEIGHT,
   },
 });

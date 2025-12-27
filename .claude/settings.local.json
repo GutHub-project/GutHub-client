@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(NODE_OPTIONS=\"--no-experimental-detect-module\" npx expo start:*)"
+    ]
+  }
+}
