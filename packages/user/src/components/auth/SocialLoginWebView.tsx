@@ -57,10 +57,10 @@ export const SocialLoginWebView = ({
 
   /**
    * WebView URL 로드 전 가로채기 (리다이렉트 URL 감지)
+   * Android와 iOS 모두 지원
    */
-  const handleShouldStartLoad = (request: { url: string }) => {
-    const { url } = request;
-    console.log('[SocialLoginWebView] Should start load URL:', url);
+  const handleUrlRedirect = (url: string): boolean => {
+    console.log('[SocialLoginWebView] Intercepting URL:', url);
 
     // 기존 회원 - /login/success로 리다이렉트
     if (url.includes('/login/success')) {
@@ -69,13 +69,13 @@ export const SocialLoginWebView = ({
         const accessToken = urlObj.searchParams.get('accessToken');
 
         if (accessToken) {
-          console.log('[SocialLoginWebView] 로그인 성공');
+          console.log('[SocialLoginWebView] 로그인 성공, accessToken:', accessToken);
           onSuccess(accessToken);
           onClose();
           return false; // URL 로드 중단
         }
       } catch (error) {
-        console.error('[SocialLoginWebView] URL 파싱 실패:', error);
+        console.error('[SocialLoginWebView] /login/success URL 파싱 실패:', error);
       }
     }
     // 신규 회원 - /profile-setup으로 리다이렉트
@@ -85,17 +85,35 @@ export const SocialLoginWebView = ({
         const tempToken = urlObj.searchParams.get('tempToken');
 
         if (tempToken) {
-          console.log('[SocialLoginWebView] 회원가입 필요');
+          console.log('[SocialLoginWebView] 회원가입 필요, tempToken:', tempToken);
           onSignupRequired(tempToken);
           onClose();
           return false; // URL 로드 중단
         }
       } catch (error) {
-        console.error('[SocialLoginWebView] URL 파싱 실패:', error);
+        console.error('[SocialLoginWebView] /profile-setup URL 파싱 실패:', error);
       }
     }
 
     return true; // 다른 URL은 정상 로드
+  };
+
+  /**
+   * iOS용 URL 가로채기
+   */
+  const handleShouldStartLoad = (request: { url: string }) => {
+    return handleUrlRedirect(request.url);
+  };
+
+  /**
+   * Android용 URL 가로채기
+   */
+  const handleNavigationStateChange = (navState: { url: string }) => {
+    const shouldLoad = handleUrlRedirect(navState.url);
+    if (!shouldLoad) {
+      // Android에서는 로딩을 막을 수 없으므로, stopLoading 호출 필요
+      // 하지만 여기서는 이미 onClose()가 호출되어 WebView가 사라짐
+    }
   };
 
   return (
@@ -120,6 +138,7 @@ export const SocialLoginWebView = ({
         <WebView
           source={{ uri: loginUrl }}
           onShouldStartLoadWithRequest={handleShouldStartLoad}
+          onNavigationStateChange={handleNavigationStateChange}
           onLoadStart={() => {
             console.log('[SocialLoginWebView] Load Start:', loginUrl);
             setLoading(true);
