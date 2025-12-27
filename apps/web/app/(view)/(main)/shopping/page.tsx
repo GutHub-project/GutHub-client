@@ -151,7 +151,7 @@ export default function ShoppingPage() {
           marginBottom: '12px',
         }}>
           <div style={{ fontSize: '16px', fontWeight: '700', color: '#333', flex: 1 }}>
-            <span style={{ color: '#ff6b6b' }}>'변비형'</span> 에게 지금 인기있는 건강기능식품
+            <span style={{ color: '#ff6b6b' }}>&apos;변비형&apos;</span> 에게 지금 인기있는 건강기능식품
           </div>
           <span style={{ fontSize: '18px', color: '#666' }}>{'>'}</span>
         </div>
