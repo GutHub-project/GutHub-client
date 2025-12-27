@@ -1,13 +1,13 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
 /**
  * 프로필 설정 페이지 (신규 회원)
  * OAuth 인증 후 백엔드에서 이 페이지로 리다이렉트
  */
-export default function ProfileSetupPage() {
+function ProfileSetupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -342,5 +342,24 @@ export default function ProfileSetupPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function ProfileSetupPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '16px',
+        color: '#666'
+      }}>
+        로딩 중...
+      </div>
+    }>
+      <ProfileSetupContent />
+    </Suspense>
   );
 }

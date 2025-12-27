@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
 /**
  * 소셜 로그인 성공 페이지
  * - 네이티브 앱의 WebView에서는 이 페이지가 로드되기 전에 URL이 가로채짐
  * - 웹 브라우저에서 직접 접속 시에만 이 페이지가 표시됨
  */
-export default function LoginSuccessPage() {
+function LoginSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -36,5 +36,24 @@ export default function LoginSuccessPage() {
     }}>
       로그인 처리 중...
     </div>
+  );
+}
+
+export default function LoginSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '16px',
+        color: '#666'
+      }}>
+        로그인 처리 중...
+      </div>
+    }>
+      <LoginSuccessContent />
+    </Suspense>
   );
 }
