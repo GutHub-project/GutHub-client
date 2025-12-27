@@ -22,6 +22,12 @@
       "types": "./dist/apis/auth.d.ts",
       "import": "./dist/apis/auth.mjs",
       "require": "./dist/apis/auth.js"
+    },
+    "./components": {
+      "react-native": "./src/components/index.ts",
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.mjs",
+      "require": "./dist/components/index.js"
     }
   },
   "scripts": {

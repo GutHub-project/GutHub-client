@@ -1,7 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import CookieManager from '@react-native-cookies/cookies';
-import { Platform } from 'react-native';
 import { useAuthStore } from '@repo/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Platform } from 'react-native';
+
 import { userApi } from '../apis';
 
 const isNative = Platform.OS !== 'web';

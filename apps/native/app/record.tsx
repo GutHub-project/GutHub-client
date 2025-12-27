@@ -1,5 +1,5 @@
-import RecordScreen from '../src/components/webview/RecordScreen';
+import { RecordScreen } from '@repo/main-feature/components';
 
 export default function Record() {
-  return <RecordScreen route={{ params: {} }} />;
+  return <RecordScreen />;
 }

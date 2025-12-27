@@ -1,9 +1,10 @@
-import { View, StyleSheet, Alert } from 'react-native';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { authApi } from '@repo/main-feature/apis/auth';
 import { Text, useAuthStore, BASE_URL } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
-import { authApi } from '@repo/main-feature/apis/auth';
+import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+
 import { SocialLoginButtons } from './SocialLoginButtons';
 import { SocialLoginWebView } from './SocialLoginWebView';
 
@@ -31,20 +32,35 @@ export const LoginScreen = () => {
   /**
    * 소셜 로그인 버튼 클릭 핸들러
    */
-  const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
-    const url = authApi.getSocialLoginUrl(provider);
-    console.log(`[LoginScreen] ${provider} 로그인 시도 URL:`, url);
-    
-    if (!url || url.startsWith('undefined') || url.startsWith('/')) {
-      console.error('[LoginScreen] 유효하지 않은 로그인 URL입니다. BASE_URL 설정을 확인하세요.');
-      // 폴백 URL 설정 (마지막 수단)
-      const fallbackUrl = `https://api.guthub.shop/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent('com.guthub://auth-callback')}`;
-      setLoginUrl(fallbackUrl);
-    } else {
-      setLoginUrl(url);
-    }
-    
-    setWebViewVisible(true);
+  const handleSocialLogin = () => {
+    const url = authApi.getSocialLoginUrl();
+    console.log(`[LoginScreen] 로그인 시도 URL:`, url);
+
+    // 디버깅용: 생성된 URL 확인
+    Alert.alert(
+      '로그인 시도',
+      `접속 주소: ${url}`,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '접속',
+          onPress: () => {
+            if (!url || url.startsWith('undefined') || url.startsWith('/')) {
+              console.error('[LoginScreen] 유효하지 않은 로그인 URL입니다. WEB_URL 설정을 확인하세요.');
+              // 폴백 URL 설정 (마지막 수단)
+              const fallbackUrl = 'https://guthub.shop';
+              setLoginUrl(fallbackUrl);
+            } else {
+              setLoginUrl(url);
+            }
+            setWebViewVisible(true);
+          }
+        }
+      ]
+    );
   };
 
   /**
@@ -70,15 +86,15 @@ export const LoginScreen = () => {
   };
 
   const handleGoogleLogin = () => {
-    handleSocialLogin('google');
+    handleSocialLogin();
   };
 
   const handleKakaoLogin = () => {
-    handleSocialLogin('kakao');
+    handleSocialLogin();
   };
 
   const handleNaverLogin = () => {
-    handleSocialLogin('naver');
+    handleSocialLogin();
   };
 
   return (

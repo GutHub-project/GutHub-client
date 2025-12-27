@@ -1,8 +1,8 @@
+import { colors } from '@repo/tailwind-config/colors';
 import { useState, useEffect } from 'react';
 import { Modal, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { WebViewNavigation } from 'react-native-webview';
-import { colors } from '@repo/tailwind-config/colors';
 
 interface SocialLoginWebViewProps {
   visible: boolean;

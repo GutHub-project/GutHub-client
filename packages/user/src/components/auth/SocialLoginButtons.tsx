@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
 import { Text } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
+import React from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
 
 interface SocialLoginButtonsProps {
   onGooglePress: () => void;

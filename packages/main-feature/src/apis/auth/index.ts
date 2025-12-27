@@ -1,4 +1,4 @@
-import { publicApiInstance, privateApiInstance, BASE_URL } from '@repo/shared';
+import { publicApiInstance, privateApiInstance, BASE_URL, WEB_URL } from '@repo/shared';
 import type {
   AuthResponse,
   RefreshTokenRequest,
@@ -10,14 +10,13 @@ import type {
  */
 export const authApi = {
   /**
-   * 소셜 로그인 URL 생성
-   * @param provider - 소셜 로그인 제공자 (naver, google, kakao)
-   * @returns 리다이렉트할 OAuth URL
+   * 웹뷰에 띄울 URL 반환 (하이브리드 웹앱)
+   * @returns 웹뷰에 띄울 웹 URL
    */
-  getSocialLoginUrl: (provider: 'naver' | 'google' | 'kakao'): string => {
-    const redirectUri = encodeURIComponent('com.guthub://auth-callback');
-    console.log('[authApi] Using BASE_URL:', BASE_URL);
-    return `${BASE_URL}/oauth2/authorization/${provider}?redirect_uri=${redirectUri}`;
+  getSocialLoginUrl: (): string => {
+    console.log('[authApi] Using WEB_URL:', WEB_URL);
+    // 하이브리드 웹앱 - 메인 페이지
+    return WEB_URL;
   },
 
   /**

@@ -38,6 +38,12 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       type: 'sourceFile',
     };
   }
+  if (moduleName === '@repo/main-feature/components') {
+    return {
+      filePath: path.resolve(workspaceRoot, 'packages/main-feature/src/components/index.ts'),
+      type: 'sourceFile',
+    };
+  }
   if (moduleName === '@repo/shared') {
     return {
       filePath: path.resolve(workspaceRoot, 'packages/shared/src/index.ts'),

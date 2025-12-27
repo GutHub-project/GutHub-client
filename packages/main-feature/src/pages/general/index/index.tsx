@@ -1,6 +1,7 @@
-import Layout from "./components/Layout";
 import DateStatus from "../dateStatus";
 import Diet from "../diet";
+
+import Layout from "./components/Layout";
 
 const General = () => {
   return (

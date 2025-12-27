@@ -1,5 +1,5 @@
-import ShoppingScreen from "../src/components/webview/ShoppingScreen";
+import { ShoppingScreen } from '@repo/main-feature/components';
 
 export default function Shopping() {
-  return <ShoppingScreen route={{ params: {} }} />
+  return <ShoppingScreen />;
 }
