@@ -5,9 +5,10 @@ import { useEffect, Suspense } from 'react';
 import { useAuthStore } from '@repo/shared';
 
 /**
- * 소셜 로그인 성공 페이지
- * - 기존 회원: accessToken을 받아서 메인으로 이동
- * - 신규 회원: tempToken을 받아서 프로필 설정으로 이동
+ * 소셜 로그인 성공 페이지 (기존 회원)
+ * - 백엔드가 OAuth 성공 후 이 페이지로 리다이렉트 (accessToken 포함)
+ * - accessToken을 저장하고 메인 페이지로 이동
+ * - 신규 회원은 백엔드가 자동으로 /profile-setup으로 보냄
  * - 네이티브 앱의 WebView에서는 이 페이지가 로드되기 전에 URL이 가로채짐
  */
 function LoginSuccessContent() {
@@ -17,17 +18,14 @@ function LoginSuccessContent() {
 
   useEffect(() => {
     const accessToken = searchParams.get('accessToken');
-    const tempToken = searchParams.get('tempToken');
 
     if (accessToken) {
       // 기존 회원: accessToken 저장 후 메인으로 이동
       setAccessToken(accessToken);
       router.replace('/');
-    } else if (tempToken) {
-      // 신규 회원: 프로필 설정 페이지로 이동
-      router.replace(`/profile-setup?tempToken=${tempToken}`);
     } else {
-      // 토큰이 없으면 로그인 페이지로
+      // accessToken이 없으면 에러 (백엔드가 잘못 리다이렉트한 경우)
+      console.error('No accessToken in /login/success');
       router.replace('/login');
     }
   }, [searchParams, router, setAccessToken]);
