@@ -138,6 +138,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@repo/diet':
+        specifier: workspace:*
+        version: link:../../packages/diet
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -205,6 +208,34 @@ importers:
       typescript:
         specifier: 5.5.4
         version: 5.5.4
+
+  packages/diet:
+    dependencies:
+      '@repo/shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: ^18.3.1
+        version: 18.3.26
+      '@types/react-dom':
+        specifier: ^18.3.1
+        version: 18.3.7(@types/react@18.3.26)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.8.3
 
   packages/eslint-config:
     devDependencies:
