@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Food } from '../../apis/diet';
+import type { Food } from '../apis';
 
 interface DietFoodSelectProps {
   food: Food;

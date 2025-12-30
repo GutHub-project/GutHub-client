@@ -1,6 +1,6 @@
 'use client';
 
-import type { Food } from '../../apis/diet';
+import type { Food } from '../apis';
 
 interface DietSearchResultsProps {
   results: Food[];
