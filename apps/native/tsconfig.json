@@ -1,13 +1,17 @@
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["ESNext"],
-    "jsx": "react-jsx",
     "strict": true,
-    "skipLibCheck": true,
-    "types": ["react-native"]
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../global.d.ts", "src/types/**/*.ts"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
