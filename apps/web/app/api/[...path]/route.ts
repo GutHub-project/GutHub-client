@@ -63,10 +63,11 @@ async function proxyRequest(
 
     console.log(`[API Proxy] ${method} ${targetUrl}`);
 
-    // 요청 헤더 복사 (Host 제외)
+    // 요청 헤더 복사 (Host, Connection, Origin 제외)
     const headers: HeadersInit = {};
     request.headers.forEach((value: string, key: string) => {
-      if (key.toLowerCase() !== 'host' && key.toLowerCase() !== 'connection') {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey !== 'host' && lowerKey !== 'connection' && lowerKey !== 'origin') {
         headers[key] = value;
       }
     });
