@@ -4,10 +4,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text } from '@repo/shared';
+import { Text, useSocialLogin, authApi } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
-import { useSocialLogin } from '@repo/shared';
-import { authApi } from '@repo/main-feature';
 import { SocialLoginButtons } from './SocialLoginButtons';
 
 /**

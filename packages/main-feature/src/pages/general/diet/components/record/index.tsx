@@ -1,6 +1,9 @@
 import { Icon } from "@repo/shared";
+import { useRouter } from "next/navigation";
 
 const Record = () => {
+  const router = useRouter();
+
   const mealData = [
     {
       id: 1,
@@ -32,6 +35,10 @@ const Record = () => {
     },
   ];
 
+  const handleAddMeal = (mealType: string) => {
+    router.push(`/diet/record?mealType=${mealType}`);
+  };
+
   return (
     <div className="flex items-start flex-col gap-[12px] w-full">
       <span className="text-[16px] font-semibold text-[#353535]">식단 기록</span>
@@ -51,7 +58,10 @@ const Record = () => {
                   <span className="text-[10px] text-Black-600 font-medium">{meal.date}</span>
                 </div>
               </div>
-              <button className="w-[12px] h-[12px] pt-[2px]">
+              <button
+                className="w-[12px] h-[12px] pt-[2px]"
+                onClick={() => handleAddMeal(meal.title)}
+              >
                 <Icon path="/General/plus-black-800-12.svg" width={12} height={12} color=""/>
               </button>
             </div>
