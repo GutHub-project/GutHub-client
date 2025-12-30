@@ -71,6 +71,11 @@ async function proxyRequest(
       }
     });
 
+    console.log('[API Proxy] Headers:', {
+      authorization: headers['authorization'] || headers['Authorization'],
+      contentType: headers['content-type'],
+    });
+
     // 요청 바디 복사
     let body: any = undefined;
     if (method !== 'GET' && method !== 'DELETE') {
