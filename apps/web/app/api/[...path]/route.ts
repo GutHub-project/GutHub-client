@@ -82,6 +82,7 @@ async function proxyRequest(
       const contentType = request.headers.get('content-type');
       if (contentType?.includes('application/json')) {
         body = await request.json();
+        console.log('[API Proxy] Request body:', body);
       } else if (contentType?.includes('multipart/form-data')) {
         body = await request.formData();
       } else {
@@ -112,12 +113,16 @@ async function proxyRequest(
 
     if (responseContentType?.includes('application/json')) {
       responseBody = await response.json();
+      console.log('[API Proxy] Response status:', response.status);
+      console.log('[API Proxy] Response body:', responseBody);
       return NextResponse.json(responseBody, {
         status: response.status,
         headers: responseHeaders,
       });
     } else {
       responseBody = await response.text();
+      console.log('[API Proxy] Response status:', response.status);
+      console.log('[API Proxy] Response body:', responseBody);
       return new NextResponse(responseBody, {
         status: response.status,
         headers: responseHeaders,
