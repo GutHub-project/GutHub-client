@@ -1,56 +1,89 @@
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, useSocialLogin, authApi } from '@repo/shared';
+import { authApi } from '@repo/main-feature/apis/auth';
+import { Text, useAuthStore, BASE_URL } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
+import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
+
 import { SocialLoginButtons } from './SocialLoginButtons';
+import { SocialLoginWebView } from './SocialLoginWebView';
 
 /**
  * 로그인 화면
  * - 소셜 로그인 버튼 (Google, Kakao, Naver)
+ * - WebView를 통한 OAuth 로그인 처리
  * - 앱 로고 및 설명
  */
 export const LoginScreen = () => {
-  const { login, isLoading, error } = useSocialLogin(authApi);
+  const router = useRouter();
+  const { login: setAuthState } = useAuthStore();
+  const [webViewVisible, setWebViewVisible] = useState(false);
+  const [loginUrl, setLoginUrl] = useState('');
 
-  const handleGoogleLogin = async () => {
-    try {
-      // TODO: Google OAuth 플로우 구현
-      // const { accessToken, idToken } = await GoogleSignIn.signIn();
-      // await login('google', accessToken, idToken);
-      console.log('Google 로그인 클릭');
-    } catch (err) {
-      console.error('Google 로그인 실패:', err);
+  // 디버깅용: 현재 설정된 BASE_URL 확인
+  useEffect(() => {
+    console.log('[LoginScreen] Current BASE_URL:', BASE_URL);
+    if (__DEV__) {
+      // 개발 모드에서만 알림 (필요시 주석 해제)
+      // Alert.alert('Debug', `BASE_URL: ${BASE_URL}`);
     }
+  }, []);
+
+  /**
+   * 소셜 로그인 버튼 클릭 핸들러
+   */
+  const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
+    const url = authApi.getSocialLoginUrl(provider);
+    console.log(`[LoginScreen] ${provider} 로그인 시도 URL:`, url);
+
+    // 웹 환경에서는 직접 OAuth URL로 리다이렉트
+    if (Platform.OS === 'web') {
+      console.log('[LoginScreen] Web platform detected, redirecting to:', url);
+      window.location.href = url;
+      return;
+    }
+
+    // 네이티브 환경에서는 WebView로 백엔드 OAuth URL 로드
+    setLoginUrl(url);
+    setWebViewVisible(true);
   };
 
-  const handleKakaoLogin = async () => {
-    try {
-      // TODO: Kakao OAuth 플로우 구현
-      // const { accessToken } = await KakaoLogin.login();
-      // await login('kakao', accessToken);
-      console.log('Kakao 로그인 클릭');
-    } catch (err) {
-      console.error('Kakao 로그인 실패:', err);
-    }
+  /**
+   * 로그인 성공 (기존 회원)
+   * @param accessToken - 액세스 토큰
+   */
+  const handleLoginSuccess = (accessToken: string) => {
+    console.log('[LoginScreen] 로그인 성공');
+    setAuthState({ accessToken });
+    router.replace('/');
   };
 
-  const handleNaverLogin = async () => {
-    try {
-      // TODO: Naver OAuth 플로우 구현
-      // const { accessToken } = await NaverLogin.login();
-      // await login('naver', accessToken);
-      console.log('Naver 로그인 클릭');
-    } catch (err) {
-      console.error('Naver 로그인 실패:', err);
-    }
+  /**
+   * 회원가입 필요 (신규 회원)
+   * @param tempToken - 임시 토큰
+   */
+  const handleSignupRequired = (tempToken: string) => {
+    console.log('[LoginScreen] 회원가입 필요');
+    router.push({
+      pathname: '/profile-setup',
+      params: { tempToken },
+    });
+  };
+
+  const handleGoogleLogin = () => {
+    handleSocialLogin('google');
+  };
+
+  const handleKakaoLogin = () => {
+    handleSocialLogin('kakao');
+  };
+
+  const handleNaverLogin = () => {
+    handleSocialLogin('naver');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         {/* 로고 영역 */}
         <View style={styles.logoContainer}>
@@ -60,39 +93,38 @@ export const LoginScreen = () => {
               GutHub
             </Text>
           </View>
-          <Text weight="medium" style={styles.subtitle}>
-            장 건강 관리 앱
+          <Text weight="medium" style={styles.description}>
+            오직 내 만을 위한 장 건강 케어
           </Text>
         </View>
 
-        {/* 소셜 로그인 버튼 영역 */}
-        <View style={styles.loginContainer}>
-          {isLoading ? (
-            <ActivityIndicator size="large" color={colors.main} />
-          ) : (
-            <>
-              <SocialLoginButtons
-                onGooglePress={handleGoogleLogin}
-                onKakaoPress={handleKakaoLogin}
-                onNaverPress={handleNaverLogin}
-              />
-              {error && (
-                <Text weight="regular" style={styles.errorText}>
-                  {error}
-                </Text>
-              )}
-            </>
-          )}
-        </View>
-
-        {/* 하단 안내 문구 */}
-        <View style={styles.footer}>
-          <Text weight="regular" style={styles.footerText}>
-            소셜 계정으로 간편하게 시작하세요
+        {/* 하단 영역 */}
+        <View style={styles.bottomSection}>
+          {/* 안내 문구 */}
+          <Text weight="regular" style={styles.helperText}>
+            3초만에 준비하세요🔑
           </Text>
+
+          {/* 소셜 로그인 버튼 */}
+          <View style={styles.loginContainer}>
+            <SocialLoginButtons
+              onGooglePress={handleGoogleLogin}
+              onKakaoPress={handleKakaoLogin}
+              onNaverPress={handleNaverLogin}
+            />
+          </View>
         </View>
       </View>
-    </SafeAreaView>
+
+      {/* 소셜 로그인 WebView */}
+      <SocialLoginWebView
+        visible={webViewVisible}
+        loginUrl={loginUrl}
+        onSuccess={handleLoginSuccess}
+        onSignupRequired={handleSignupRequired}
+        onClose={() => setWebViewVisible(false)}
+      />
+    </View>
   );
 };
 
@@ -105,48 +137,41 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'space-between',
-    paddingVertical: 40,
+    paddingVertical: 60,
   },
   logoContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 60,
   },
   logoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.main,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   logoText: {
-    fontSize: 28,
+    fontSize: 24,
     color: colors.white,
   },
-  subtitle: {
-    fontSize: 16,
-    color: colors.text,
-    marginTop: 8,
+  description: {
+    fontSize: 14,
+    color: colors['Black-600'],
+    textAlign: 'center',
+  },
+  bottomSection: {
+    gap: 16,
+  },
+  helperText: {
+    fontSize: 14,
+    color: colors['Black-600'],
+    textAlign: 'center',
   },
   loginContainer: {
     width: '100%',
     gap: 12,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  footerText: {
-    fontSize: 12,
-    color: colors['Black-600'],
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.main,
-    textAlign: 'center',
-    marginTop: 8,
   },
 });

@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
 import { Text } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
+import React from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
 
 interface SocialLoginButtonsProps {
   onGooglePress: () => void;
@@ -11,7 +11,7 @@ interface SocialLoginButtonsProps {
 
 /**
  * 소셜 로그인 버튼 컴포넌트
- * - Google, Kakao, Naver 로그인 버튼
+ * - Kakao, Google, Naver 로그인 버튼
  */
 export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
   onGooglePress,
@@ -20,22 +20,6 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Google 로그인 버튼 */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          styles.googleButton,
-          pressed && styles.pressed,
-        ]}
-        onPress={onGooglePress}
-      >
-        {/* TODO: Google 아이콘 추가 */}
-        <View style={styles.iconPlaceholder} />
-        <Text weight="semibold" style={styles.googleText}>
-          Google로 계속하기
-        </Text>
-      </Pressable>
-
       {/* Kakao 로그인 버튼 */}
       <Pressable
         style={({ pressed }) => [
@@ -46,9 +30,8 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         onPress={onKakaoPress}
       >
         {/* TODO: Kakao 아이콘 추가 */}
-        <View style={styles.iconPlaceholder} />
         <Text weight="semibold" style={styles.kakaoText}>
-          Kakao로 계속하기
+          💬 카카오 로그인
         </Text>
       </Pressable>
 
@@ -61,10 +44,23 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         ]}
         onPress={onNaverPress}
       >
-        {/* TODO: Naver 아이콘 추가 */}
-        <View style={styles.iconPlaceholder} />
         <Text weight="semibold" style={styles.naverText}>
-          Naver로 계속하기
+          네이버 로그인
+        </Text>
+      </Pressable>
+
+      {/* Google 로그인 버튼 */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          styles.googleButton,
+          pressed && styles.pressed,
+        ]}
+        onPress={onGooglePress}
+      >
+        {/* TODO: Google 아이콘 추가 */}
+        <Text weight="semibold" style={styles.googleText}>
+          구글 로그인
         </Text>
       </Pressable>
     </View>
@@ -76,33 +72,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   button: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 8,
-    gap: 12,
   },
   pressed: {
-    opacity: 0.7,
-  },
-  iconPlaceholder: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-
-  // Google 버튼 스타일
-  googleButton: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors['Black-300'],
-  },
-  googleText: {
-    fontSize: 16,
-    color: colors.text,
+    opacity: 0.8,
   },
 
   // Kakao 버튼 스타일
@@ -121,5 +98,16 @@ const styles = StyleSheet.create({
   naverText: {
     fontSize: 16,
     color: colors.white,
+  },
+
+  // Google 버튼 스타일
+  googleButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors['Black-300'],
+  },
+  googleText: {
+    fontSize: 16,
+    color: colors.text,
   },
 });
