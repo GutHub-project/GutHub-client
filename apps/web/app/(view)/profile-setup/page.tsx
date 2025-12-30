@@ -16,7 +16,7 @@ function ProfileSetupContent() {
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nickname: '',
-    ageRange: '',
+    ageRange: 0,
     gender: '',
     gutType: '',
   });
@@ -64,16 +64,21 @@ function ProfileSetupContent() {
     }
   };
 
-  const ageOptions = ['10대', '20대', '30대', '40대'];
+  const ageOptions = [
+    { label: '10대', value: 10 },
+    { label: '20대', value: 20 },
+    { label: '30대', value: 30 },
+    { label: '40대', value: 40 },
+  ];
   const genderOptions = [
     { label: '남성', value: 'MALE' },
     { label: '여성', value: 'FEMALE' },
   ];
   const gutTypeOptions = [
-    { label: '건강형', value: 'HEALTHY' },
-    { label: '변비형', value: 'CONSTIPATION' },
-    { label: '설사형', value: 'DIARRHEA' },
-    { label: '가스·복부팽만형', value: 'GAS_BLOATING' },
+    { label: '건강형', value: '건강형' },
+    { label: '변비형', value: '변비형' },
+    { label: '설사형', value: '설사형' },
+    { label: '가스·복부팽만형', value: '가스·복부팽만형' },
   ];
 
   return (
@@ -223,24 +228,24 @@ function ProfileSetupContent() {
             연령대
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {ageOptions.map((age) => (
+            {ageOptions.map((option) => (
               <button
-                key={age}
+                key={option.value}
                 type="button"
-                onClick={() => setFormData(prev => ({ ...prev, ageRange: age }))}
+                onClick={() => setFormData(prev => ({ ...prev, ageRange: option.value }))}
                 style={{
                   flex: 1,
                   padding: '12px 0',
                   borderRadius: '8px',
-                  border: formData.ageRange === age ? '2px solid #ff6b6b' : '1px solid #e0e0e0',
-                  backgroundColor: formData.ageRange === age ? '#fff' : '#f8f8f8',
-                  color: formData.ageRange === age ? '#ff6b6b' : '#999',
+                  border: formData.ageRange === option.value ? '2px solid #ff6b6b' : '1px solid #e0e0e0',
+                  backgroundColor: formData.ageRange === option.value ? '#fff' : '#f8f8f8',
+                  color: formData.ageRange === option.value ? '#ff6b6b' : '#999',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  fontWeight: formData.ageRange === age ? '600' : '400',
+                  fontWeight: formData.ageRange === option.value ? '600' : '400',
                 }}
               >
-                {age}
+                {option.label}
               </button>
             ))}
           </div>
