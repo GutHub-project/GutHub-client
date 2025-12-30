@@ -24,9 +24,9 @@ function LoginSuccessContent() {
       setAccessToken(accessToken);
       router.replace('/');
     } else {
-      // accessToken이 없으면 에러 (백엔드가 잘못 리다이렉트한 경우)
+      // accessToken이 없으면 메인으로 이동
       console.error('No accessToken in /login/success');
-      router.replace('/login');
+      router.replace('/');
     }
   }, [searchParams, router, setAccessToken]);
 
