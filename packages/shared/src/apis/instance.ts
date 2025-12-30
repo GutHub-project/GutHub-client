@@ -7,8 +7,9 @@ const DEFAULT_WEB_URL = 'https://guthub.shop';
 
 // 환경변수 가져오기 - Next.js에서는 NEXT_PUBLIC_ 접두사 필수
 const getBaseUrl = (): string => {
-  // 브라우저 환경(Web)에서는 Mixed Content 방지를 위해 Next.js 프록시(/api) 사용
-  if (typeof window !== 'undefined') {
+  // 프로덕션 웹 브라우저 환경에서만 프록시 사용 (Mixed Content 방지)
+  // 개발 환경(localhost)에서는 직접 API 호출
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
     return '/api';
   }
 
