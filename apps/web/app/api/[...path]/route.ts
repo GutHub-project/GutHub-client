@@ -13,36 +13,41 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://api.guthub.shop:
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params;
   return proxyRequest(request, params.path, 'GET');
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params;
   return proxyRequest(request, params.path, 'POST');
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params;
   return proxyRequest(request, params.path, 'PUT');
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params;
   return proxyRequest(request, params.path, 'DELETE');
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> }
 ) {
+  const params = await context.params;
   return proxyRequest(request, params.path, 'PATCH');
 }
 
@@ -60,7 +65,7 @@ async function proxyRequest(
 
     // 요청 헤더 복사 (Host 제외)
     const headers: HeadersInit = {};
-    request.headers.forEach((value, key) => {
+    request.headers.forEach((value: string, key: string) => {
       if (key.toLowerCase() !== 'host' && key.toLowerCase() !== 'connection') {
         headers[key] = value;
       }
@@ -89,7 +94,7 @@ async function proxyRequest(
 
     // 응답 헤더 복사
     const responseHeaders = new Headers();
-    response.headers.forEach((value, key) => {
+    response.headers.forEach((value: string, key: string) => {
       // CORS 관련 헤더는 제외 (Next.js가 자동 처리)
       if (!key.toLowerCase().startsWith('access-control-')) {
         responseHeaders.set(key, value);
