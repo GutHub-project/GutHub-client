@@ -2,11 +2,16 @@ import axios, { AxiosInstance } from 'axios';
 import { errorInterceptor, requestInterceptor, successInterceptor } from './interceptors';
 
 // 기본값
-const DEFAULT_BASE_URL = 'https://api.guthub.shop';
+const DEFAULT_BASE_URL = 'http://api.guthub.shop:8080';
 const DEFAULT_WEB_URL = 'https://guthub.shop';
 
 // 환경변수 가져오기 - Next.js에서는 NEXT_PUBLIC_ 접두사 필수
 const getBaseUrl = (): string => {
+  // 브라우저 환경(Web)에서는 Mixed Content 방지를 위해 Next.js 프록시(/api) 사용
+  if (typeof window !== 'undefined') {
+    return '/api';
+  }
+
   // Next.js 환경변수 (브라우저에서도 접근 가능)
   if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
