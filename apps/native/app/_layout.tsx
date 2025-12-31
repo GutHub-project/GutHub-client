@@ -22,6 +22,8 @@ const AppLayout = () => {
     'Pretendard-Black': require('../assets/fonts/Pretendard-Black.ttf'),
   });
 
+  console.log('[_layout] Font loading state - loaded:', loaded, 'error:', error);
+
   const { isAuthenticated, login: setAuthState } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
