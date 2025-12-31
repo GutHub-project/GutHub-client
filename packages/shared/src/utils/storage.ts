@@ -1,7 +1,5 @@
 import { Platform } from 'react-native';
 
-const ACCESS_TOKEN_KEY = 'accessToken';
-
 export const getStorage = () => {
   if (Platform.OS === 'web') {
     return {
@@ -45,8 +43,9 @@ export const getStorage = () => {
 
 const storageInstance = getStorage();
 
+// 범용 storage (필요시 다른 데이터 저장용)
 export const storage = {
-  getAccessToken: () => storageInstance.getItem(ACCESS_TOKEN_KEY),
-  setAccessToken: (token: string) => storageInstance.setItem(ACCESS_TOKEN_KEY, token),
-  removeAccessToken: () => storageInstance.removeItem(ACCESS_TOKEN_KEY),
+  getItem: (key: string) => storageInstance.getItem(key),
+  setItem: (key: string, value: string) => storageInstance.setItem(key, value),
+  removeItem: (key: string) => storageInstance.removeItem(key),
 };

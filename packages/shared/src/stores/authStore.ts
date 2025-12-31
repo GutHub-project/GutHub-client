@@ -8,7 +8,9 @@ const isNative = Platform.OS !== 'web';
 /**
  * 인증 상태 관리를 위한 Zustand Store
  *
- * 리프레시 토큰은 쿠키로 관리되므로 액세스 토큰만 저장합니다.
+ * - 웹/네이티브 모두: Refresh Token은 HttpOnly 쿠키로 관리 (WebView 내부에서)
+ * - Access Token은 메모리(Zustand)에만 보관
+ * - 네이티브는 WebView로 웹을 띄우므로 쿠키는 WebView가 관리
  *
  * 사용 예시:
  * ```tsx
@@ -22,13 +24,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
   isLoading: false,
 
-  // 액션: 액세스 토큰 설정
+  // 액션: 액세스 토큰 설정 (메모리에만 저장)
   setAccessToken: async (accessToken: string) => {
-    try {
-      await storage.setAccessToken(accessToken);
-    } catch (error) {
-      console.error('[AuthStore] Failed to save accessToken:', error);
-    }
     set({
       accessToken,
       isAuthenticated: true,
@@ -42,11 +39,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   // 액션: 인증 정보 초기화
   clearAuth: async () => {
-    try {
-      await storage.removeAccessToken();
-    } catch (error) {
-      console.error('[AuthStore] Failed to remove accessToken:', error);
-    }
     set({
       accessToken: null,
       user: null,
@@ -54,15 +46,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
   },
 
-  // 액션: 로그인 (액세스 토큰 + 사용자 정보 저장)
+  // 액션: 로그인 (Access Token만 메모리에 저장, Refresh Token은 쿠키로 자동 관리)
   login: async (response: { accessToken: string; userId?: string; email?: string; name?: string; profileImage?: string }) => {
     const { accessToken, userId, email, name, profileImage } = response;
-
-    try {
-      await storage.setAccessToken(accessToken);
-    } catch (error) {
-      console.error('[AuthStore] Failed to save accessToken:', error);
-    }
 
     set({
       accessToken,
@@ -77,13 +63,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
   },
 
-  // 액션: 로그아웃 (상태 초기화)
+  // 액션: 로그아웃 (상태 초기화만, 쿠키는 서버 API에서 삭제)
   logout: async () => {
-    try {
-      await storage.removeAccessToken();
-    } catch (error) {
-      console.error('[AuthStore] Failed to remove accessToken:', error);
-    }
     set({
       accessToken: null,
       user: null,
@@ -98,16 +79,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 }));
 
-// 초기 토큰 로드 함수
+// 초기 토큰 로드 함수 (웹에서만 실행, 네이티브는 WebView가 알아서 처리)
 export const initializeAuth = async () => {
-  try {
-    const accessToken = await storage.getAccessToken();
-    if (accessToken) {
-      useAuthStore.getState().setAccessToken(accessToken);
-    }
-  } catch (error) {
-    console.error('[AuthStore] Failed to load accessToken:', error);
-  }
+  // 네이티브는 WebView 안에서 쿠키로 관리되므로 별도 초기화 불필요
+  if (isNative) return;
+
+  // 웹에서는 쿠키가 자동으로 전송되므로 별도 초기화 불필요
+  // 필요시 여기에 초기 사용자 정보 로드 로직 추가
 };
 
 // 액세스 토큰 가져오기 헬퍼 함수
