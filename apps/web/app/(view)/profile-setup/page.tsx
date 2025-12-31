@@ -14,7 +14,12 @@ function ProfileSetupContent() {
   const { setAccessToken } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [tempToken, setTempToken] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    nickname: string;
+    ageRange: number;
+    gender: string;
+    gutType: string;
+  }>({
     nickname: '',
     ageRange: 0,
     gender: '',
