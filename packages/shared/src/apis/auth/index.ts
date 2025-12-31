@@ -51,13 +51,15 @@ export const authApi = {
 
   /**
    * 리프레시 토큰으로 액세스 토큰 갱신
-   * 리프레시 토큰은 쿠키로 자동 전송됨
+   * - 웹: 리프레시 토큰은 쿠키로 자동 전송
+   * - 네이티브: 리프레시 토큰을 body에 담아서 전송
+   * @param refreshToken - (네이티브 전용) 저장된 refresh token
    * @returns 새로운 액세스 토큰
    */
-  refreshToken: async (): Promise<RefreshTokenResponse> => {
+  refreshToken: async (refreshToken?: string): Promise<RefreshTokenResponse> => {
     const response = await publicApiInstance.post<RefreshTokenResponse>(
       '/jwt/refresh',
-      {} // 리프레시 토큰은 쿠키로 전송되므로 body는 비어있음
+      refreshToken ? { refreshToken } : {} // 네이티브: body에 포함, 웹: 쿠키로 전송
     );
     return response.data;
   },

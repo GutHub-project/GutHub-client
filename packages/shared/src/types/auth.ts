@@ -4,6 +4,7 @@ export type SocialProvider = 'google' | 'kakao' | 'naver';
 // 소셜 로그인 응답 타입
 export interface AuthResponse {
   accessToken: string;
+  refreshToken?: string; // 네이티브에서만 사용
   userId?: string;
   email?: string;
   name?: string;
