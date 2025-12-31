@@ -5,7 +5,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Linking from 'expo-linking';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Alert } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -130,14 +129,6 @@ const AppLayout = () => {
   const fontsReady = loaded || error;
   if (!fontsReady || !isReady) {
     console.log('[_layout] Returning null - fontsReady:', fontsReady, 'isReady:', isReady);
-    // 디버깅용 Alert
-    setTimeout(() => {
-      Alert.alert(
-        'Debug Info',
-        `loaded: ${loaded}\nerror: ${error}\nfontsReady: ${fontsReady}\nisReady: ${isReady}`,
-        [{ text: 'OK' }]
-      );
-    }, 3000);
     return null;
   }
 
