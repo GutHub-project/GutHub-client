@@ -130,6 +130,14 @@ const AppLayout = () => {
   const fontsReady = loaded || error;
   if (!fontsReady || !isReady) {
     console.log('[_layout] Returning null - fontsReady:', fontsReady, 'isReady:', isReady);
+    // 디버깅용 Alert
+    setTimeout(() => {
+      Alert.alert(
+        'Debug Info',
+        `loaded: ${loaded}\nerror: ${error}\nfontsReady: ${fontsReady}\nisReady: ${isReady}`,
+        [{ text: 'OK' }]
+      );
+    }, 3000);
     return null;
   }
 
