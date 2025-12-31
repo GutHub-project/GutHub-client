@@ -1,5 +1,4 @@
-import { authApi } from '@repo/main-feature/apis/auth';
-import { Text, useAuthStore, BASE_URL } from '@repo/shared';
+import { Text, useAuthStore, BASE_URL, WEB_URL } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -33,7 +32,9 @@ export const LoginScreen = () => {
    * 소셜 로그인 버튼 클릭 핸들러
    */
   const handleSocialLogin = (provider: 'google' | 'kakao' | 'naver') => {
-    const url = authApi.getSocialLoginUrl(provider);
+    // OAuth URL 직접 생성
+    const redirectUri = encodeURIComponent(`${WEB_URL}/login/success`);
+    const url = `${BASE_URL}/oauth2/authorization/${provider}?redirect_uri=${redirectUri}`;
     console.log(`[LoginScreen] ${provider} 로그인 시도 URL:`, url);
 
     // 웹 환경에서는 직접 OAuth URL로 리다이렉트
