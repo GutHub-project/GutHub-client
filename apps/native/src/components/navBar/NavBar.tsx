@@ -9,13 +9,8 @@ export function NavBar() {
   const router = useRouter();
 
   const handlePress = (href: string) => {
-    // 홈은 웹뷰 루트로, 다른 탭들은 웹뷰 URL 변경
-    if (href === '/') {
-      router.push('/');
-    } else {
-      // 웹뷰에 URL 파라미터로 전달
-      router.push(`/?url=${encodeURIComponent(href)}`);
-    }
+    // Expo Router 파일 경로로 직접 이동
+    router.push(href);
   };
 
   return (
