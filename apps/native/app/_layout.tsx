@@ -30,11 +30,21 @@ const AppLayout = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        await initializeAuth();
-        setIsReady(true);
+        console.log('[_layout] Starting initializeAuth...');
+        // 5초 타임아웃 추가
+        await Promise.race([
+          initializeAuth(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Auth timeout')), 5000)
+          )
+        ]);
+        console.log('[_layout] Auth initialized successfully');
       } catch (err) {
         console.error('[_layout] Auth init error:', err);
-        setIsReady(true); // 에러나도 진행
+      } finally {
+        // 성공/실패 관계없이 진행
+        console.log('[_layout] Setting isReady to true');
+        setIsReady(true);
       }
     };
     init();
@@ -101,13 +111,16 @@ const AppLayout = () => {
     if (!isReady) return;
 
     const inAuthGroup = segments[0] === 'login';
+    console.log('[_layout] Routing - isAuthenticated:', isAuthenticated, 'inAuthGroup:', inAuthGroup, 'segments:', segments);
 
     if (!isAuthenticated && !inAuthGroup) {
+      console.log('[_layout] Redirecting to /login');
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
+      console.log('[_layout] Redirecting to /');
       router.replace('/');
     }
-  }, [isAuthenticated, segments, router, isReady]);
+  }, [isAuthenticated, segments, isReady]);
 
   // 준비 안 되면 null 반환 (스플래시 계속 표시)
   if (!isReady || (!loaded && !error)) {
