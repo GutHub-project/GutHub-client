@@ -1,4 +1,5 @@
-import { StyleSheet } from 'react-native';
+import { useRef, useEffect, useState } from 'react';
+import { StyleSheet, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -33,9 +34,55 @@ const INJECTED_JAVASCRIPT = `
 `;
 
 export default function Home() {
+  const webViewRef = useRef<WebView>(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [exitApp, setExitApp] = useState(false);
+  const exitTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (canGoBack && webViewRef.current) {
+        // WebView에서 뒤로 갈 수 있으면 뒤로 가기
+        webViewRef.current.goBack();
+        return true;
+      } else {
+        // 뒤로 갈 수 없으면 앱 종료 로직
+        if (exitApp) {
+          // 두 번째 뒤로가기: 앱 종료
+          BackHandler.exitApp();
+          return true;
+        } else {
+          // 첫 번째 뒤로가기: 토스트 메시지
+          setExitApp(true);
+          if (Platform.OS === 'android') {
+            ToastAndroid.show('한 번 더 누르면 종료됩니다', ToastAndroid.SHORT);
+          }
+
+          // 2초 후 exitApp 상태 리셋
+          if (exitTimeout.current) {
+            clearTimeout(exitTimeout.current);
+          }
+          exitTimeout.current = setTimeout(() => {
+            setExitApp(false);
+          }, 2000);
+
+          return true;
+        }
+      }
+    });
+
+    return () => {
+      backHandler.remove();
+      if (exitTimeout.current) {
+        clearTimeout(exitTimeout.current);
+      }
+    };
+  }, [canGoBack, exitApp]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <WebView
+        ref={webViewRef}
         source={{ uri: WEB_URL }}
         style={styles.webview}
         javaScriptEnabled={true}
@@ -48,6 +95,9 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
+        onNavigationStateChange={(navState) => {
+          setCanGoBack(navState.canGoBack);
+        }}
       />
     </SafeAreaView>
   );
