@@ -1,4 +1,3 @@
-import { colors } from '@repo/tailwind-config/colors';
 import { useState, useEffect } from 'react';
 import { Modal, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -6,8 +5,7 @@ import { WebView } from 'react-native-webview';
 interface SocialLoginWebViewProps {
   visible: boolean;
   loginUrl: string;
-  onSuccess: (accessToken: string) => void;
-  onSignupRequired: (tempToken: string) => void;
+  onSuccess: (accessToken: string, refreshToken?: string) => void;
   onClose: () => void;
 }
 
@@ -20,7 +18,6 @@ export const SocialLoginWebView = ({
   visible,
   loginUrl,
   onSuccess,
-  onSignupRequired,
   onClose,
 }: SocialLoginWebViewProps) => {
   const [loading, setLoading] = useState(true);
@@ -62,15 +59,16 @@ export const SocialLoginWebView = ({
   const handleUrlRedirect = (url: string): boolean => {
     console.log('[SocialLoginWebView] Intercepting URL:', url);
 
-    // 기존 회원 - /login/success로 리다이렉트
+    // /login/success로 리다이렉트 시 토큰 추출
     if (url.includes('/login/success')) {
       try {
         const urlObj = new URL(url);
         const accessToken = urlObj.searchParams.get('accessToken');
+        const refreshToken = urlObj.searchParams.get('refreshToken');
 
         if (accessToken) {
           console.log('[SocialLoginWebView] 로그인 성공, accessToken:', accessToken);
-          onSuccess(accessToken);
+          onSuccess(accessToken, refreshToken || undefined);
           onClose();
           return false; // URL 로드 중단
         }
@@ -115,7 +113,7 @@ export const SocialLoginWebView = ({
         </View>
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.main} />
+            <ActivityIndicator size="large" color="#FF6B6B" />
             <Text style={styles.loadingText}>페이지를 불러오는 중...</Text>
           </View>
         )}
@@ -164,7 +162,7 @@ export const SocialLoginWebView = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: '#ffffff',
   },
   header: {
     height: 50,
@@ -181,7 +179,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    color: colors.main,
+    color: '#FF6B6B',
     fontWeight: 'bold',
   },
   loadingContainer: {
@@ -197,7 +195,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    color: colors.text,
+    color: '#333333',
   },
   webview: {
     flex: 1,
