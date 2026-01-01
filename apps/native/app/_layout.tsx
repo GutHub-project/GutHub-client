@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Linking from 'expo-linking';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Alert } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +23,8 @@ const AppLayout = () => {
     'Pretendard-Black': require('../assets/fonts/Pretendard-Black.ttf'),
   });
 
+  console.log('[_layout] Font loading state - loaded:', loaded, 'error:', error);
+
   const { isAuthenticated, login: setAuthState } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
@@ -29,7 +32,9 @@ const AppLayout = () => {
   // 초기 인증 정보 로드
   useEffect(() => {
     const init = async () => {
+      console.log('[_layout] Initializing auth...');
       await initializeAuth();
+      console.log('[_layout] Auth initialized');
       setIsReady(true);
     };
     init();
@@ -92,24 +97,32 @@ const AppLayout = () => {
   }, [router, setAuthState]);
 
   useEffect(() => {
+    console.log('[_layout] Fonts loaded:', loaded, 'Ready:', isReady, 'Error:', error);
     // 폰트 로딩 완료 또는 에러 발생 시 스플래시 숨김
     if (loaded || error) {
       setTimeout(() => {
+        console.log('[_layout] Hiding splash screen');
         SplashScreen.hideAsync();
       }, 1000);
     }
-  }, [loaded, error]);
+  }, [loaded, isReady, error]);
 
   useEffect(() => {
     // 폰트 로딩 실패해도 인증만 완료되면 진행
     const fontsReady = loaded || error;
-    if (!fontsReady || !isReady) return;
+    if (!fontsReady || !isReady) {
+      console.log('[_layout] Waiting... fontsReady:', fontsReady, 'isReady:', isReady);
+      return;
+    }
 
     const inAuthGroup = segments[0] === 'login';
+    console.log('[_layout] Routing check - isAuthenticated:', isAuthenticated, 'inAuthGroup:', inAuthGroup, 'segments:', segments);
 
     if (!isAuthenticated && !inAuthGroup) {
+      console.log('[_layout] Redirecting to /login');
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
+      console.log('[_layout] Redirecting to /');
       router.replace('/');
     }
   }, [isAuthenticated, segments, router, loaded, error, isReady]);
@@ -117,8 +130,19 @@ const AppLayout = () => {
   // 폰트 로딩 실패해도 인증만 완료되면 진행
   const fontsReady = loaded || error;
   if (!fontsReady || !isReady) {
+    console.log('[_layout] Returning null - fontsReady:', fontsReady, 'isReady:', isReady);
+    // 디버깅용 Alert
+    setTimeout(() => {
+      Alert.alert(
+        'Debug Info',
+        `loaded: ${loaded}\nerror: ${error}\nfontsReady: ${fontsReady}\nisReady: ${isReady}`,
+        [{ text: 'OK' }]
+      );
+    }, 3000);
     return null;
   }
+
+  console.log('[_layout] Rendering Stack');
 
   return (
     <SafeAreaProvider>
