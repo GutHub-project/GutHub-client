@@ -24,24 +24,38 @@ const AppLayout = () => {
     'Pretendard-Black': require('../assets/fonts/Pretendard-Black.ttf'),
   });
 
-  // Refresh Token 체크 및 인증 상태 설정
+  // Refresh Token 체크 및 인증 상태 설정 (2초 타임아웃)
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const checkRefreshToken = async () => {
+      console.log('[_layout] Checking refresh token...');
       try {
         const refreshToken = await storage.getItem('refreshToken');
         if (refreshToken) {
-          console.log('Refresh Token found, setting authenticated');
-          // Refresh Token이 있으면 임시로 인증된 상태로 설정
-          // TODO: 실제로는 Refresh Token으로 Access Token 갱신 API 호출
+          console.log('[_layout] Refresh Token found, setting authenticated');
           await setAccessToken('temp-token');
+        } else {
+          console.log('[_layout] No refresh token, staying unauthenticated');
         }
       } catch (error) {
-        console.error('Failed to check refresh token:', error);
+        console.error('[_layout] Failed to check refresh token:', error);
       } finally {
+        clearTimeout(timeoutId);
+        console.log('[_layout] Setting isReady = true');
         setIsReady(true);
       }
     };
+
+    // 2초 타임아웃: 체크가 너무 오래 걸리면 강제로 진행
+    timeoutId = setTimeout(() => {
+      console.warn('[_layout] Refresh token check timeout, forcing isReady = true');
+      setIsReady(true);
+    }, 2000);
+
     checkRefreshToken();
+
+    return () => clearTimeout(timeoutId);
   }, [setAccessToken]);
 
   // 폰트 에러 무시
@@ -62,25 +76,34 @@ const AppLayout = () => {
 
   // 라우팅: Refresh Token 유무에 따라 / 또는 /login으로 이동
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady) {
+      console.log('[_layout] Not ready yet, skipping routing');
+      return;
+    }
 
     const inAuthGroup = segments[0] === 'login';
+    console.log('[_layout] Routing - isAuthenticated:', isAuthenticated, 'inAuthGroup:', inAuthGroup, 'segments:', segments);
 
     if (!isAuthenticated && !inAuthGroup) {
-      // 인증 안됨 + 로그인 화면 아님 → 로그인으로
-      console.log('Not authenticated, redirecting to /login');
+      console.log('[_layout] → Redirecting to /login');
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // 인증됨 + 로그인 화면 → 홈으로
-      console.log('Authenticated, redirecting to /');
+      console.log('[_layout] → Redirecting to /');
       router.replace('/');
+    } else {
+      console.log('[_layout] → Staying on current route');
     }
   }, [isAuthenticated, segments, router, isReady]);
 
+  console.log('[_layout] Render - isReady:', isReady);
+
   // isReady만 체크 (폰트는 선택사항)
   if (!isReady) {
+    console.log('[_layout] ⚠️ Returning null (waiting for isReady)');
     return null;
   }
+
+  console.log('[_layout] ✅ Rendering Stack');
 
   return (
     <QueryProvider>
