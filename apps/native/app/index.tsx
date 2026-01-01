@@ -1,7 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SimpleNavBar } from '../src/components/navBar/SimpleNavBar';
 
 const WEB_URL = 'https://guthub.shop';
 
@@ -19,9 +18,6 @@ const INJECTED_JAVASCRIPT = `
     document.body.style.webkitUserSelect = 'none';
     document.body.style.touchAction = 'manipulation';
 
-    // 하단바 높이만큼 여백 추가 (Safe Area 포함하여 여유있게)
-    document.body.style.paddingBottom = '100px';
-
     // 전체 화면 활성화
     document.documentElement.style.height = '100%';
     document.body.style.height = '100%';
@@ -38,7 +34,7 @@ const INJECTED_JAVASCRIPT = `
 
 export default function Home() {
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <WebView
         source={{ uri: WEB_URL }}
         style={styles.webview}
@@ -53,7 +49,6 @@ export default function Home() {
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
       />
-      <SimpleNavBar />
     </SafeAreaView>
   );
 }
