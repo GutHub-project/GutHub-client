@@ -31,16 +31,16 @@ const nextConfig = async () => {
       return config;
     },
     async rewrites() {
-      // NEXT_PUBLIC_API_URL이 설정된 경우에만 rewrite(프록시) 추가
-      if (process.env.NEXT_PUBLIC_API_URL) {
-        return [
-          {
-            source: '/api/:path*',
-            destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
-          },
-        ];
-      }
-      return [];
+      // API 프록시 설정 (Mixed Content 방지)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://api.guthub.shop:8080';
+      console.log('[Next.js rewrites] API_URL:', apiUrl);
+
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${apiUrl}/:path*`,
+        },
+      ];
     },
   };
 };

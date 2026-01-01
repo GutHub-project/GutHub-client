@@ -7,25 +7,29 @@ const DEFAULT_WEB_URL = 'https://guthub.shop';
 
 // 환경변수 가져오기 - Next.js에서는 NEXT_PUBLIC_ 접두사 필수
 const getBaseUrl = (): string => {
+  // 프로덕션 웹 브라우저 환경에서는 프록시 사용 (Mixed Content 방지)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    console.log('[getBaseUrl] Production browser, using /api proxy');
+    return '/api';
+  }
+
   // Next.js 환경변수 (브라우저에서도 접근 가능)
   if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL) {
+    console.log('[getBaseUrl] Using NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
     return process.env.NEXT_PUBLIC_API_URL;
   }
   // Node.js 환경변수
   if (typeof process !== 'undefined' && process.env?.BASE_URL) {
+    console.log('[getBaseUrl] Using BASE_URL:', process.env.BASE_URL);
     return process.env.BASE_URL;
   }
   // Vite 환경변수
   if (typeof process !== 'undefined' && process.env?.VITE_BASE_URL) {
+    console.log('[getBaseUrl] Using VITE_BASE_URL:', process.env.VITE_BASE_URL);
     return process.env.VITE_BASE_URL;
   }
 
-  // 브라우저 환경에서 기본값 사용 (Mixed Content 경고 발생 가능하지만 프록시 없을 때 대비)
-  if (typeof window !== 'undefined') {
-    // 프로덕션에서는 일단 직접 API 호출 시도
-    return DEFAULT_BASE_URL;
-  }
-
+  console.log('[getBaseUrl] Using DEFAULT_BASE_URL:', DEFAULT_BASE_URL);
   return DEFAULT_BASE_URL;
 };
 
