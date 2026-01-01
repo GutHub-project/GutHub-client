@@ -51,10 +51,11 @@ const AppLayout = () => {
       // com.guthub://auth-callback?accessToken=xxx&refreshToken=xxx (기존 회원)
       if (hostname === 'auth-callback' && queryParams) {
         const accessToken = queryParams.accessToken as string | undefined;
+        const refreshToken = queryParams.refreshToken as string | undefined;
 
         if (accessToken) {
           console.log('[Deep Link] 로그인 성공');
-          setAuthState({ accessToken });
+          setAuthState({ accessToken, refreshToken });
           router.replace('/');
         }
       }
