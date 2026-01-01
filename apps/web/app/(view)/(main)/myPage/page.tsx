@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { userApi, authApi, useAuthStore } from '@repo/shared';
 import { useSearchParams } from 'next/navigation';
 
@@ -11,7 +11,7 @@ import { useSearchParams } from 'next/navigation';
  * - 로그인 O: 프로필 조회 및 수정 (userApi)
  * - 로그인 X (회원가입): 프로필 등록 (authApi.completeSignup)
  */
-export default function MyPage() {
+function MyPageContent() {
   const { isAuthenticated } = useAuthStore();
   const searchParams = useSearchParams();
   const tempToken = searchParams.get('tempToken'); // 회원가입 시 임시 토큰
@@ -361,5 +361,13 @@ export default function MyPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function MyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MyPageContent />
+    </Suspense>
   );
 }
