@@ -27,7 +27,6 @@ const AppLayout = () => {
       try {
         const refreshToken = await storage.getItem('refreshToken');
         if (refreshToken) {
-          // TODO: Refresh Token으로 Access Token 갱신
           console.log('Refresh Token found');
         }
       } catch (error) {
@@ -39,19 +38,24 @@ const AppLayout = () => {
     checkRefreshToken();
   }, []);
 
+  // 폰트 에러 무시
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      console.error('Font loading error (ignored):', error);
+    }
   }, [error]);
 
+  // 스플래시 숨김 - 폰트 로딩 완료 또는 에러 발생 시
   useEffect(() => {
-    if (loaded) {
+    if (loaded || error) {
       setTimeout(() => {
         SplashScreen.hideAsync();
-      }, 1000);
+      }, 500);
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
-  if (!loaded || !isReady) {
+  // isReady만 체크 (폰트는 선택사항)
+  if (!isReady) {
     return null;
   }
 
