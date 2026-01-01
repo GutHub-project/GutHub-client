@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert, Platform } from 'react-native';
 
+import { Logo } from '../../../../native/src/components/Logo';
+import { LogoName } from '../../../../native/src/components/LogoName';
 import { SocialLoginButtons } from './SocialLoginButtons';
 import { SocialLoginWebView } from './SocialLoginWebView';
 
@@ -87,11 +89,9 @@ export const LoginScreen = () => {
       <View style={styles.content}>
         {/* 로고 영역 */}
         <View style={styles.logoContainer}>
-          {/* TODO: 실제 앱 로고 이미지로 교체 */}
-          <View style={styles.logoPlaceholder}>
-            <Text weight="bold" style={styles.logoText}>
-              GutHub
-            </Text>
+          <Logo width={80} height={74} />
+          <View style={styles.logoNameContainer}>
+            <LogoName width={120} height={28} />
           </View>
           <Text weight="medium" style={styles.description}>
             오직 내 만을 위한 장 건강 케어
@@ -143,24 +143,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.main,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logoText: {
-    fontSize: 24,
-    color: colors.white,
+  logoNameContainer: {
+    marginTop: 8,
   },
   description: {
     fontSize: 14,
     color: colors['Black-600'],
     textAlign: 'center',
+    marginTop: 8,
   },
   bottomSection: {
     gap: 16,
