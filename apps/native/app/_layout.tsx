@@ -2,7 +2,7 @@ import { QueryProvider, storage, useAuthStore } from '@repo/shared';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -11,6 +11,7 @@ const AppLayout = () => {
   const { isAuthenticated, setAccessToken } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
+  const hasNavigated = useRef(false);
 
   const [loaded, error] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.ttf'),
@@ -65,44 +66,46 @@ const AppLayout = () => {
     }
   }, [error]);
 
-  // 스플래시 숨김 - 폰트 로딩 완료 또는 에러 발생 시
+  // 스플래시 숨김 - isReady가 true가 되고 폰트 로딩이 완료되면 숨김
   useEffect(() => {
-    if (loaded || error) {
+    if (isReady && (loaded || error)) {
+      console.log('[_layout] Hiding splash screen');
       setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 500);
+        SplashScreen.hideAsync().catch(err => {
+          console.error('[_layout] Failed to hide splash:', err);
+        });
+      }, 300);
     }
-  }, [loaded, error]);
+  }, [isReady, loaded, error]);
 
-  // 라우팅: Refresh Token 유무에 따라 / 또는 /login으로 이동
+  // 라우팅: Refresh Token 유무에 따라 / 또는 /login으로 이동 (초기 한 번만 실행)
   useEffect(() => {
-    if (!isReady) {
-      console.log('[_layout] Not ready yet, skipping routing');
+    if (!isReady || hasNavigated.current) {
+      console.log('[_layout] Not ready or already navigated, skipping routing');
       return;
     }
 
     const inAuthGroup = segments[0] === 'login';
-    console.log('[_layout] Routing - isAuthenticated:', isAuthenticated, 'inAuthGroup:', inAuthGroup, 'segments:', segments);
+    console.log('[_layout] Initial routing - isAuthenticated:', isAuthenticated, 'inAuthGroup:', inAuthGroup);
 
+    // 초기 네비게이션 수행 (한 번만)
     if (!isAuthenticated && !inAuthGroup) {
       console.log('[_layout] → Redirecting to /login');
       router.replace('/login');
+      hasNavigated.current = true;
     } else if (isAuthenticated && inAuthGroup) {
       console.log('[_layout] → Redirecting to /');
       router.replace('/');
+      hasNavigated.current = true;
     } else {
-      console.log('[_layout] → Staying on current route');
+      console.log('[_layout] → Already on correct route');
+      hasNavigated.current = true;
     }
-  }, [isAuthenticated, segments, router, isReady]);
+  }, [isReady, isAuthenticated, router, segments]);
 
-  console.log('[_layout] Render - isReady:', isReady);
+  console.log('[_layout] Render - isReady:', isReady, 'loaded:', loaded, 'error:', !!error);
 
-  // isReady만 체크 (폰트는 선택사항)
-  if (!isReady) {
-    console.log('[_layout] ⚠️ Returning null (waiting for isReady)');
-    return null;
-  }
-
+  // 항상 Stack을 렌더링 (스플래시는 useEffect에서 제어)
   console.log('[_layout] ✅ Rendering Stack');
 
   return (
