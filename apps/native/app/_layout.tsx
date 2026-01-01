@@ -36,7 +36,10 @@ const AppLayout = () => {
   }, []);
 
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      console.error('[_layout] Font loading error:', error);
+      // 폰트 로딩 에러 무시 (시스템 폰트 사용)
+    }
   }, [error]);
 
   // Deep Link 처리
@@ -89,15 +92,18 @@ const AppLayout = () => {
   }, [router, setAuthState]);
 
   useEffect(() => {
-    if (loaded) {
+    // 폰트 로딩 완료 또는 에러 발생 시 스플래시 숨김
+    if (loaded || error) {
       setTimeout(() => {
         SplashScreen.hideAsync();
       }, 1000);
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
   useEffect(() => {
-    if (!loaded || !isReady) return;
+    // 폰트 로딩 실패해도 인증만 완료되면 진행
+    const fontsReady = loaded || error;
+    if (!fontsReady || !isReady) return;
 
     const inAuthGroup = segments[0] === 'login';
 
@@ -106,9 +112,11 @@ const AppLayout = () => {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace('/');
     }
-  }, [isAuthenticated, segments, router, loaded, isReady]);
+  }, [isAuthenticated, segments, router, loaded, error, isReady]);
 
-  if (!loaded || !isReady) {
+  // 폰트 로딩 실패해도 인증만 완료되면 진행
+  const fontsReady = loaded || error;
+  if (!fontsReady || !isReady) {
     return null;
   }
 
