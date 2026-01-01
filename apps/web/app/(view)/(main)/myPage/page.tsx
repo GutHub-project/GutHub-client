@@ -19,14 +19,14 @@ export default function MyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<{
     nickname: string;
-    ageRange: string;
+    ageRange: number;
     gender: string;
-    gutType: string;
+    gutTypeCode: string; // 선택된 장 건강 유형 코드
   }>({
     nickname: '',
-    ageRange: '',
+    ageRange: 0,
     gender: '',
-    gutType: '',
+    gutTypeCode: '',
   });
 
   // 회원가입 모드인지 확인 (로그인 안됐고 tempToken 있으면 회원가입)
@@ -41,9 +41,9 @@ export default function MyPage() {
 
       setFormData({
         nickname: profile.nickname || '',
-        ageRange: profile.ageRange || '',
+        ageRange: profile.ageRange || 0,
         gender: profile.gender || '',
-        gutType: profile.gutType || '',
+        gutTypeCode: profile.gutType?.code || '',
       });
 
       alert('프로필을 불러왔습니다.');
@@ -95,9 +95,9 @@ export default function MyPage() {
       setIsLoading(true);
       const signupData = {
         nickname: formData.nickname,
-        ageRange: parseInt(formData.ageRange) || 0,
+        ageRange: formData.ageRange,
         gender: formData.gender,
-        gutType: formData.gutType,
+        gutType: formData.gutTypeCode,
       };
 
       const response = await authApi.completeSignup(signupData, tempToken);
@@ -114,20 +114,20 @@ export default function MyPage() {
   };
 
   const ageOptions = [
-    { label: '10대', value: '10' },
-    { label: '20대', value: '20' },
-    { label: '30대', value: '30' },
-    { label: '40대', value: '40' },
+    { label: '10대', value: 10 },
+    { label: '20대', value: 20 },
+    { label: '30대', value: 30 },
+    { label: '40대', value: 40 },
   ];
   const genderOptions = [
     { label: '남성', value: 'MALE' },
     { label: '여성', value: 'FEMALE' },
   ];
   const gutTypeOptions = [
-    { label: '건강형', value: '건강형' },
-    { label: '변비형', value: '변비형' },
-    { label: '설사형', value: '설사형' },
-    { label: '가스·복부팽만형', value: '가스·복부팽만형' },
+    { label: '가스 예민형', value: 'GUT-001' },
+    { label: '변비형', value: 'GUT-002' },
+    { label: '설사형', value: 'GUT-003' },
+    { label: '건강형', value: 'GUT-004' },
   ];
 
   return (
@@ -322,16 +322,16 @@ export default function MyPage() {
               <button
                 key={option.value}
                 type="button"
-                onClick={() => setFormData(prev => ({ ...prev, gutType: option.value }))}
+                onClick={() => setFormData(prev => ({ ...prev, gutTypeCode: option.value }))}
                 style={{
                   padding: '12px 20px',
                   borderRadius: '20px',
-                  border: formData.gutType === option.value ? '2px solid #ff6b6b' : '1px solid #e0e0e0',
+                  border: formData.gutTypeCode === option.value ? '2px solid #ff6b6b' : '1px solid #e0e0e0',
                   backgroundColor: '#fff',
-                  color: formData.gutType === option.value ? '#ff6b6b' : '#999',
+                  color: formData.gutTypeCode === option.value ? '#ff6b6b' : '#999',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  fontWeight: formData.gutType === option.value ? '600' : '400',
+                  fontWeight: formData.gutTypeCode === option.value ? '600' : '400',
                 }}
               >
                 {option.label}

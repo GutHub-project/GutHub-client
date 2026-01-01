@@ -70,9 +70,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
       accessToken,
       user: name ? {
         nickname: name,
-        ageRange: '', // TODO: 응답에서 받아오도록 수정
+        ageRange: 0, // TODO: 응답에서 받아오도록 수정
         gender: '', // TODO: 응답에서 받아오도록 수정
-        gutType: '', // TODO: 응답에서 받아오도록 수정
+        gutType: {
+          code: '',
+          name: '',
+          description: '',
+          imageUrl: '',
+        }, // TODO: 응답에서 받아오도록 수정
       } : null,
       isAuthenticated: true,
       isLoading: false,

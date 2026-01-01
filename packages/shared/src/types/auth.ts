@@ -21,12 +21,20 @@ export interface RefreshTokenResponse {
   accessToken: string;
 }
 
+// 장 건강 유형 타입
+export interface GutType {
+  code: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
 // 사용자 정보 타입
 export interface UserProfile {
   nickname: string;
-  ageRange: string;
+  ageRange: number;
   gender: string;
-  gutType: string;
+  gutType: GutType;
 }
 
 // Auth Store 상태 타입 (리프레시 토큰은 쿠키로 관리하므로 제거)
