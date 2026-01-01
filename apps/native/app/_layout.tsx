@@ -1,6 +1,6 @@
-import { QueryProvider, storage } from '@repo/shared';
+import { QueryProvider, storage, useAuthStore } from '@repo/shared';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 
@@ -8,6 +8,9 @@ SplashScreen.preventAutoHideAsync();
 
 const AppLayout = () => {
   const [isReady, setIsReady] = useState(false);
+  const { isAuthenticated, setAccessToken } = useAuthStore();
+  const router = useRouter();
+  const segments = useSegments();
 
   const [loaded, error] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.ttf'),
@@ -21,13 +24,16 @@ const AppLayout = () => {
     'Pretendard-Black': require('../assets/fonts/Pretendard-Black.ttf'),
   });
 
-  // Refresh Token 체크
+  // Refresh Token 체크 및 인증 상태 설정
   useEffect(() => {
     const checkRefreshToken = async () => {
       try {
         const refreshToken = await storage.getItem('refreshToken');
         if (refreshToken) {
-          console.log('Refresh Token found');
+          console.log('Refresh Token found, setting authenticated');
+          // Refresh Token이 있으면 임시로 인증된 상태로 설정
+          // TODO: 실제로는 Refresh Token으로 Access Token 갱신 API 호출
+          await setAccessToken('temp-token');
         }
       } catch (error) {
         console.error('Failed to check refresh token:', error);
@@ -36,7 +42,7 @@ const AppLayout = () => {
       }
     };
     checkRefreshToken();
-  }, []);
+  }, [setAccessToken]);
 
   // 폰트 에러 무시
   useEffect(() => {
@@ -53,6 +59,23 @@ const AppLayout = () => {
       }, 500);
     }
   }, [loaded, error]);
+
+  // 라우팅: Refresh Token 유무에 따라 / 또는 /login으로 이동
+  useEffect(() => {
+    if (!isReady) return;
+
+    const inAuthGroup = segments[0] === 'login';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // 인증 안됨 + 로그인 화면 아님 → 로그인으로
+      console.log('Not authenticated, redirecting to /login');
+      router.replace('/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      // 인증됨 + 로그인 화면 → 홈으로
+      console.log('Authenticated, redirecting to /');
+      router.replace('/');
+    }
+  }, [isAuthenticated, segments, router, isReady]);
 
   // isReady만 체크 (폰트는 선택사항)
   if (!isReady) {
