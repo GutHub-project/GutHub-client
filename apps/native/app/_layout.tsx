@@ -11,6 +11,8 @@ SplashScreen.preventAutoHideAsync();
 
 const AppLayout = () => {
   const [isReady, setIsReady] = useState(false);
+  const [showDebugAlert, setShowDebugAlert] = useState(false);
+
   const [loaded, error] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.ttf'),
     'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.ttf'),
@@ -127,18 +129,27 @@ const AppLayout = () => {
     }
   }, [isAuthenticated, segments, router, loaded, error, isReady]);
 
+  // 디버깅용 Alert - 한 번만 표시
+  useEffect(() => {
+    const fontsReady = loaded || error;
+    if (!fontsReady || !isReady) {
+      if (!showDebugAlert) {
+        const timer = setTimeout(() => {
+          Alert.alert(
+            'Debug Info',
+            `loaded: ${loaded}\nerror: ${error ? error.message : 'null'}\nfontsReady: ${fontsReady}\nisReady: ${isReady}`,
+            [{ text: 'OK', onPress: () => setShowDebugAlert(true) }]
+          );
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loaded, error, isReady, showDebugAlert]);
+
   // 폰트 로딩 실패해도 인증만 완료되면 진행
   const fontsReady = loaded || error;
   if (!fontsReady || !isReady) {
     console.log('[_layout] Returning null - fontsReady:', fontsReady, 'isReady:', isReady);
-    // 디버깅용 Alert
-    setTimeout(() => {
-      Alert.alert(
-        'Debug Info',
-        `loaded: ${loaded}\nerror: ${error}\nfontsReady: ${fontsReady}\nisReady: ${isReady}`,
-        [{ text: 'OK' }]
-      );
-    }, 3000);
     return null;
   }
 
