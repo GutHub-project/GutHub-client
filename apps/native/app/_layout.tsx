@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
+import { ErrorBoundary } from './ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,11 +29,22 @@ const AppLayout = () => {
   // Refresh Token 체크 및 인증 상태 설정 (2초 타임아웃)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
+    let isCancelled = false;
 
     const checkRefreshToken = async () => {
       console.log('[_layout] Checking refresh token...');
       try {
-        const refreshToken = await storage.getItem('refreshToken');
+        console.log('[_layout] Attempting to get refreshToken from storage');
+        const refreshToken = await Promise.race([
+          storage.getItem('refreshToken'),
+          new Promise<null>((resolve) => setTimeout(() => {
+            console.warn('[_layout] Storage getItem timeout');
+            resolve(null);
+          }, 1500))
+        ]);
+
+        if (isCancelled) return;
+
         if (refreshToken) {
           console.log('[_layout] Refresh Token found, setting authenticated');
           await setAccessToken('temp-token');
@@ -41,22 +53,30 @@ const AppLayout = () => {
         }
       } catch (error) {
         console.error('[_layout] Failed to check refresh token:', error);
+        console.error('[_layout] Error details:', JSON.stringify(error));
       } finally {
-        clearTimeout(timeoutId);
-        console.log('[_layout] Setting isReady = true');
-        setIsReady(true);
+        if (!isCancelled) {
+          clearTimeout(timeoutId);
+          console.log('[_layout] Setting isReady = true');
+          setIsReady(true);
+        }
       }
     };
 
     // 2초 타임아웃: 체크가 너무 오래 걸리면 강제로 진행
     timeoutId = setTimeout(() => {
       console.warn('[_layout] Refresh token check timeout, forcing isReady = true');
-      setIsReady(true);
+      if (!isCancelled) {
+        setIsReady(true);
+      }
     }, 2000);
 
     checkRefreshToken();
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [setAccessToken]);
 
   // 폰트 에러 무시
@@ -109,14 +129,16 @@ const AppLayout = () => {
   console.log('[_layout] ✅ Rendering Stack');
 
   return (
-    <QueryProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'none',
-        }}
-      />
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'none',
+          }}
+        />
+      </QueryProvider>
+    </ErrorBoundary>
   );
 };
 
