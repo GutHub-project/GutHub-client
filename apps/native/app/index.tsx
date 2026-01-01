@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuthStore } from '../src/stores/authStore';
 import { useRouter } from 'expo-router';
+import { SimpleNavBar } from '../src/components/navBar/SimpleNavBar';
 
 export default function Home() {
   const { clearAuth } = useAuthStore();
@@ -13,12 +14,16 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>GutHub 홈</Text>
-      <Text style={styles.subtitle}>장 건강 케어 앱</Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>GutHub 홈</Text>
+        <Text style={styles.subtitle}>장 건강 케어 앱</Text>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>로그아웃</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>로그아웃</Text>
+        </TouchableOpacity>
+      </View>
+
+      <SimpleNavBar />
     </View>
   );
 }
@@ -27,9 +32,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingBottom: 90, // 하단바 공간 확보
   },
   title: {
     fontSize: 32,
