@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore } from '../src/stores/authStore';
+import { useAuthStore, initializeAuth } from '../src/stores/authStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,11 +16,16 @@ const AppLayout = () => {
   const segments = useSegments();
 
   useEffect(() => {
-    // 앱 초기화
-    setTimeout(() => {
-      setIsReady(true);
-      SplashScreen.hideAsync();
-    }, 1000);
+    // 앱 초기화 및 자동 로그인
+    const init = async () => {
+      await initializeAuth(); // 저장된 refresh token으로 자동 로그인
+      setTimeout(() => {
+        setIsReady(true);
+        SplashScreen.hideAsync();
+      }, 1000);
+    };
+
+    init();
   }, []);
 
   // 라우팅 로직
