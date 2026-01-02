@@ -69,7 +69,7 @@ export const errorInterceptor = async (error: AxiosError<ErrorResponse>): Promis
     if (status === 401) {
       if (errorCode === 'TOKEN_EXPIRED') {
         // Access Token 만료 - Refresh Token으로 재발급 시도
-        const isRefreshRequest = config.url?.includes('/auth/refresh');
+        const isRefreshRequest = config.url?.includes('/jwt/refresh');
 
         if (isRefreshRequest) {
           return handleLogout('TOKEN_EXPIRED', '세션이 만료되었습니다. 다시 로그인해주세요.');
@@ -77,11 +77,18 @@ export const errorInterceptor = async (error: AxiosError<ErrorResponse>): Promis
 
         try {
           const baseURL = config.baseURL || '';
-          const refreshUrl = baseURL.endsWith('/') ? 'auth/refresh' : '/auth/refresh';
+          const refreshUrl = baseURL.endsWith('/') ? 'jwt/refresh' : '/jwt/refresh';
 
-          const response = await axios.get(`${baseURL}${refreshUrl}`, {
-            withCredentials: true,
-          });
+          // 네이티브에서는 저장된 refresh token 사용
+          const { getRefreshToken } = await import('../stores/authStore');
+          const refreshToken = await getRefreshToken();
+
+          const response = await axios.post(`${baseURL}${refreshUrl}`,
+            refreshToken ? { refreshToken } : {}, // 네이티브: body에 포함, 웹: 쿠키로 전송
+            {
+              withCredentials: true, // 웹의 경우 쿠키 전송
+            }
+          );
           const newAccessToken = response.data.accessToken;
 
           await useAuthStore.getState().setAccessToken(newAccessToken);
