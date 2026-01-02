@@ -1,10 +1,14 @@
 'use client';
 
 import { BottomNavBar } from '@/components/BottomNavBar';
+import { WebViewBridge } from '@/components/WebViewBridge';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen">
+      {/* WebView와 네이티브 앱 간 통신 */}
+      <WebViewBridge />
+
       {/* 메인 컨텐츠 - 하단바 높이만큼 여백 */}
       <main
         className="pb-[70px] overflow-y-auto"

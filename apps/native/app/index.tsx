@@ -43,8 +43,8 @@ export default function Home() {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (canGoBack && webViewRef.current) {
-        // WebView에서 뒤로 갈 수 있으면 뒤로 가기
-        webViewRef.current.goBack();
+        // WebView에 뒤로가기 메시지 전송 (SPA 라우팅 처리)
+        webViewRef.current.postMessage(JSON.stringify({ type: 'GO_BACK' }));
         return true;
       } else {
         // 뒤로 갈 수 없으면 앱 종료 로직
@@ -80,6 +80,21 @@ export default function Home() {
     };
   }, [canGoBack, exitApp]);
 
+  // 웹에서 보내는 메시지 처리
+  const handleMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'NAVIGATION_STATE') {
+        // 웹 앱의 라우팅 히스토리 상태 업데이트
+        setCanGoBack(data.canGoBack);
+        // exitApp 상태 리셋 (새로운 네비게이션 발생 시)
+        setExitApp(false);
+      }
+    } catch (error) {
+      console.log('Message parsing error:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <WebView
@@ -96,9 +111,7 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
-        onNavigationStateChange={(navState) => {
-          setCanGoBack(navState.canGoBack);
-        }}
+        onMessage={handleMessage}
       />
     </SafeAreaView>
   );
