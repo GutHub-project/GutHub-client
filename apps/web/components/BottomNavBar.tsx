@@ -15,7 +15,12 @@ export function BottomNavBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-inset-bottom">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]"
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       <div className="flex items-center justify-around h-[70px] px-2">
         {tabs.map((tab) => {
           const isActive = pathname === tab.path;
@@ -24,13 +29,13 @@ export function BottomNavBar() {
             <Link
               key={tab.name}
               href={tab.path}
-              className="flex flex-col items-center justify-center flex-1 py-2"
+              className="flex flex-col items-center justify-center flex-1 py-2 active:scale-95 transition-transform"
             >
-              <span className={`text-2xl mb-1 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+              <span className={`text-2xl mb-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>
                 {tab.icon}
               </span>
               <span
-                className={`text-xs ${
+                className={`text-xs transition-colors ${
                   isActive ? 'text-[#FF6B6B] font-semibold' : 'text-gray-500'
                 }`}
               >

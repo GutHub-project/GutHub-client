@@ -4,8 +4,18 @@ import { BottomNavBar } from '@/components/BottomNavBar';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col h-screen">
-      <main className="flex-1 overflow-y-auto pb-[70px]">{children}</main>
+    <div className="relative min-h-screen">
+      {/* 메인 컨텐츠 - 하단바 높이만큼 여백 */}
+      <main
+        className="pb-[70px] overflow-y-auto"
+        style={{
+          paddingBottom: 'calc(70px + env(safe-area-inset-bottom))',
+        }}
+      >
+        {children}
+      </main>
+
+      {/* 하단 네비게이션 바 - 고정 */}
       <BottomNavBar />
     </div>
   );
