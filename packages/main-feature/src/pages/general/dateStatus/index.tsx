@@ -20,9 +20,9 @@ const DateStatus = () => {
   const isHealthy = true; // false로 변경하면 '아픈' 상태 표시
 
   const healthStatus = {
-    image: isHealthy ? "/General/main-healthy.png" : "/General/main-sick.png",
+    character: isHealthy ? "/General/home/heal.png" : "/General/home/sick.png",
+    background: isHealthy ? "/General/home/healbackground.png" : "/General/home/sickbackground.png",
     text: isHealthy ? "건강해요!" : "아파요..",
-    ellipse: "/General/Ellipse-15063.png", // 배경 이미지 (필요시 사용)
   };
 
   return (
@@ -38,12 +38,22 @@ const DateStatus = () => {
           </button>
         ))}
       </div>
-      <div className="flex justify-center items-center w-full h-[240px]">
+      <div className="relative flex justify-center items-center w-full h-[240px]">
+        {/* 캐릭터 - 중앙 */}
         <Image
-          src={healthStatus.image}
+          src={healthStatus.character}
           alt={healthStatus.text}
-          width={240}
-          height={240}
+          width={200}
+          height={200}
+          className="relative z-10"
+        />
+        {/* 배경 - 오른쪽 하단 */}
+        <Image
+          src={healthStatus.background}
+          alt="background"
+          width={180}
+          height={180}
+          className="absolute right-0 bottom-0 z-0"
         />
       </div>
       <div className="w-full h-[38px] bg-Linear text-center text-text flex items-center justify-center rounded-[10px] opacity-100 gap-[3px]">
