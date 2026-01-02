@@ -143,6 +143,7 @@ function MyPageContent() {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px 20px',
+        paddingTop: 'calc(16px + env(safe-area-inset-top))',
         borderBottom: '1px solid #f0f0f0',
       }}>
         <h1 style={{
