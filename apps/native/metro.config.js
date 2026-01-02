@@ -17,48 +17,22 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
-// 3. Force resolve workspace packages to their source files
+// 3. Metro resolver - monorepo workspace 패키지 해석
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // Handle @repo packages by pointing to their source
-  if (moduleName === '@repo/user/components') {
-    return {
-      filePath: path.resolve(workspaceRoot, 'packages/user/src/components/index.ts'),
-      type: 'sourceFile',
-    };
-  }
-  if (moduleName === '@repo/user/hooks') {
-    return {
-      filePath: path.resolve(workspaceRoot, 'packages/user/src/hooks/index.ts'),
-      type: 'sourceFile',
-    };
-  }
-  if (moduleName === '@repo/main-feature/apis/auth') {
-    return {
-      filePath: path.resolve(workspaceRoot, 'packages/main-feature/src/apis/auth/index.ts'),
-      type: 'sourceFile',
-    };
-  }
-  if (moduleName === '@repo/main-feature/components') {
-    return {
-      filePath: path.resolve(workspaceRoot, 'packages/main-feature/src/components/index.ts'),
-      type: 'sourceFile',
-    };
-  }
-  if (moduleName === '@repo/shared') {
-    return {
-      filePath: path.resolve(workspaceRoot, 'packages/shared/src/index.ts'),
-      type: 'sourceFile',
-    };
+  // @repo 패키지들 - 기본 로직으로 처리 (pnpm symlink 활용)
+  // Metro가 자동으로 node_modules 경로에서 찾음
+  if (moduleName.startsWith('@repo/')) {
+    return context.resolveRequest(context, moduleName, platform);
   }
 
-  // Fallback to default resolver
+  // 기본 resolver 사용
   return context.resolveRequest(context, moduleName, platform);
 };
 
-// 4. Disable package exports (we're manually resolving)
-config.resolver.unstable_enablePackageExports = false;
+// 4. Enable package exports 및 proper resolution
+config.resolver.unstable_enablePackageExports = true;
 
-// 5. Disable hierarchical lookup to prevent pnpm issues
+// 5. 계층적 조회 활성화 (pnpm 호환)
 config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;

@@ -1,24 +1,35 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter, usePathname } from 'expo-router';
+import { useState } from 'react';
 
-export function SimpleNavBar() {
-  const router = useRouter();
-  const pathname = usePathname();
+interface SimpleNavBarProps {
+  onNavigate: (path: string) => void;
+}
+
+export function SimpleNavBar({ onNavigate }: SimpleNavBarProps) {
+  const [activeTab, setActiveTab] = useState('home');
 
   const tabs = [
-    { name: 'home', href: '/', label: '홈', icon: '🏠' },
+    { name: 'home', path: '/', label: '홈', icon: '🏠' },
+    { name: 'shopping', path: '/shopping', label: '쇼핑', icon: '🛒' },
+    { name: 'record', path: '/record', label: '기록', icon: '📝' },
+    { name: 'mypage', path: '/myPage', label: '마이', icon: '👤' },
   ];
+
+  const handleTabPress = (tab: typeof tabs[0]) => {
+    setActiveTab(tab.name);
+    onNavigate(tab.path);
+  };
 
   return (
     <View style={styles.container}>
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
+        const isActive = activeTab === tab.name;
 
         return (
           <TouchableOpacity
             key={tab.name}
             style={styles.tab}
-            onPress={() => router.push(tab.href)}
+            onPress={() => handleTabPress(tab)}
             activeOpacity={0.7}
           >
             <Text style={[styles.icon, isActive && styles.activeIcon]}>

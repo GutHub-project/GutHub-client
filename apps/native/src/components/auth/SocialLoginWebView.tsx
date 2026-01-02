@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, StyleSheet, View, ActivityIndicator, Alert, TouchableOpacity, Text } from 'react-native';
+import { Modal, StyleSheet, View, ActivityIndicator, Alert, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 interface SocialLoginWebViewProps {
@@ -20,12 +20,12 @@ export const SocialLoginWebView = ({
   onSuccess,
   onClose,
 }: SocialLoginWebViewProps) => {
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // 디버깅 및 타임아웃 처리
   useEffect(() => {
     if (visible) {
-      setLoading(true);
+      setInitialLoading(true);
       console.log('[SocialLoginWebView] Opening with URL:', loginUrl);
       
       // URL이 이상하면 즉시 알림
@@ -35,7 +35,7 @@ export const SocialLoginWebView = ({
 
       // 20초 후에도 로딩 중이면 타임아웃 알림
       const timer = setTimeout(() => {
-        setLoading((prev) => {
+        setInitialLoading((prev) => {
           if (prev) {
             Alert.alert(
               '로딩 지연',
@@ -49,6 +49,9 @@ export const SocialLoginWebView = ({
       }, 20000);
       
       return () => clearTimeout(timer);
+    } else {
+      // Modal이 닫힐 때 초기화
+      setInitialLoading(true);
     }
   }, [visible, loginUrl]);
 
@@ -59,7 +62,7 @@ export const SocialLoginWebView = ({
   const handleUrlRedirect = (url: string): boolean => {
     console.log('[SocialLoginWebView] Intercepting URL:', url);
 
-    // /login/success로 리다이렉트 시 토큰 추출
+    // /login/success로 리다이렉트 시 토큰 추출 (WebView는 닫지 않고 계속 진행)
     if (url.includes('/login/success')) {
       try {
         const urlObj = new URL(url);
@@ -67,17 +70,16 @@ export const SocialLoginWebView = ({
         const refreshToken = urlObj.searchParams.get('refreshToken');
 
         if (accessToken) {
-          console.log('[SocialLoginWebView] 로그인 성공, accessToken:', accessToken);
+          console.log('[SocialLoginWebView] 로그인 성공, accessToken 저장:', accessToken);
+          // 토큰만 저장하고 WebView는 닫지 않음 - 백엔드가 리다이렉트하는 대로 진행
           onSuccess(accessToken, refreshToken || undefined);
-          onClose();
-          return false; // URL 로드 중단
         }
       } catch (error) {
         console.error('[SocialLoginWebView] /login/success URL 파싱 실패:', error);
       }
     }
 
-    return true; // 다른 URL은 정상 로드
+    return true; // 모든 URL 정상 로드
   };
 
   /**
@@ -104,30 +106,23 @@ export const SocialLoginWebView = ({
       animationType="slide"
       presentationStyle="fullScreen"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>닫기</Text>
-          </TouchableOpacity>
-        </View>
-        {loading && (
+        {initialLoading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF6B6B" />
-            <Text style={styles.loadingText}>페이지를 불러오는 중...</Text>
+            <Text style={styles.loadingText}>로그인 페이지를 불러오는 중...</Text>
           </View>
         )}
         <WebView
           source={{ uri: loginUrl }}
           onShouldStartLoadWithRequest={handleShouldStartLoad}
           onNavigationStateChange={handleNavigationStateChange}
-          onLoadStart={() => {
-            console.log('[SocialLoginWebView] Load Start:', loginUrl);
-            setLoading(true);
-          }}
           onLoadEnd={() => {
-            console.log('[SocialLoginWebView] Load End');
-            setLoading(false);
+            console.log('[SocialLoginWebView] Initial load complete');
+            // 초기 로딩만 한 번만 끝내기
+            setInitialLoading(false);
           }}
           onError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
@@ -164,33 +159,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
-  header: {
-    height: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginTop: 40, // 상태바 고려
-  },
-  closeButton: {
-    padding: 10,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#FF6B6B',
-    fontWeight: 'bold',
-  },
   loadingContainer: {
     position: 'absolute',
-    top: 50,
+    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     zIndex: 1,
   },
   loadingText: {

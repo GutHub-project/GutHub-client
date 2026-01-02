@@ -23,9 +23,9 @@ export const SimpleLoginScreen = () => {
   };
 
   const handleLoginSuccess = (accessToken: string, refreshToken?: string) => {
-    console.log('[Login] Success! Got accessToken');
+    console.log('[Login] Success! Got accessToken, 토큰 저장');
+    // 토큰만 저장하고 라우팅하지 않음 - WebView가 계속 진행됨
     setAccessToken(accessToken);
-    router.replace('/');
   };
 
   return (

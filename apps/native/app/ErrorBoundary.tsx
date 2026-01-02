@@ -58,7 +58,8 @@ export class ErrorBoundary extends Component<Props, State> {
             다시 시도해주세요.
           </Text>
 
-          {__DEV__ && this.state.error && (
+          {/* 프로덕션/개발 모두에서 에러 정보 표시 */}
+          {this.state.error && (
             <View style={styles.errorDetails}>
               <Text style={styles.errorText}>
                 {this.state.error.toString()}
