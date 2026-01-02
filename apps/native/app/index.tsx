@@ -3,6 +3,7 @@ import { StyleSheet, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 const WEB_URL = 'https://guthub.shop';
 
 // 모바일 최적화를 위한 JavaScript 코드
