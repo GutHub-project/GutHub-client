@@ -76,6 +76,7 @@ export function RecordPage() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '12px 16px',
+          paddingTop: 'calc(12px + env(safe-area-inset-top))',
         }}
       >
         <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>GutHub | 하단남의 하루</div>

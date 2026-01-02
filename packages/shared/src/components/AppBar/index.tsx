@@ -18,7 +18,12 @@ interface AppBarProps {
 
 const AppBar = ({ leftContent, text, rightContent, bgColor = 'bg-background' }: AppBarProps) => {
   return (
-    <div className={`fixed top-0 left-auto right-auto z-100 flex justify-between items-center border-none pt-4 px-4 pb-2 w-full h-[32px] ${bgColor}`}>
+    <div
+      className={`fixed top-0 left-auto right-auto z-100 flex justify-between items-center border-none px-4 pb-2 w-full h-[32px] ${bgColor}`}
+      style={{
+        paddingTop: 'calc(1rem + env(safe-area-inset-top))'
+      }}
+    >
       <div className="flex items-start">
         {leftContent && <div className="mr-6 flex items-center">{leftContent}</div>}
         <span className="font-semibold text-[20px] whitespace-nowrap max-w-full">

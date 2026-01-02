@@ -76,6 +76,7 @@ export function ShoppingPage() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '12px 16px',
+          paddingTop: 'calc(12px + env(safe-area-inset-top))',
           borderBottom: '1px solid #f0f0f0',
         }}
       >
