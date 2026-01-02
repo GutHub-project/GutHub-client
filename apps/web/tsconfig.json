@@ -1,10 +1,11 @@
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "../../packages/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "moduleResolution": "bundler",
     "types": [],
     "paths": {
+      "@/*": ["./*"],
       "@repo/shared": ["../../packages/shared/dist/index.d.ts"],
       "@repo/shared/*": ["../../packages/shared/dist/*"],
       "@repo/main-feature": ["../../packages/main-feature/dist/index.d.ts"],

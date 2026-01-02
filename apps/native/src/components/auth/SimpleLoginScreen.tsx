@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useAuthStore } from '../../stores/authStore';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -32,8 +32,17 @@ export const SimpleLoginScreen = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>GutHub</Text>
+          <View style={styles.logoWrapper}>
+            <Image
+              source={{ uri: '/AppBar/logo.svg' }}
+              style={styles.logoIcon}
+              resizeMode="contain"
+            />
+            <Image
+              source={{ uri: '/AppBar/logo-name.svg' }}
+              style={styles.logoName}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.description}>오직 내 만을 위한 장 건강 케어</Text>
         </View>
@@ -79,8 +88,6 @@ export const SimpleLoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  
-  
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -96,19 +103,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FF6B6B',
-    justifyContent: 'center',
+  logoWrapper: {
+    flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 20,
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffffff',
+  logoIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 12,
+  },
+  logoName: {
+    width: 120,
+    height: 28,
   },
   description: {
     fontSize: 14,
