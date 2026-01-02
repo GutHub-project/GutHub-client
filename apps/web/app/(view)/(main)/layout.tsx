@@ -5,7 +5,7 @@ import { WebViewBridge } from '@/components/WebViewBridge';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-[#FFF5F5]">
       {/* WebView와 네이티브 앱 간 통신 */}
       <WebViewBridge />
 
