@@ -1,17 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export function BottomNavBar() {
   const pathname = usePathname();
 
   const tabs = [
-    { name: 'microorganismTest', path: '/microorganismTest', label: '미생물 검사', icon: '🔬' },
-    { name: 'record', path: '/record', label: '기록', icon: '📝' },
-    { name: 'home', path: '/', label: '홈', icon: '🏠' },
-    { name: 'shopping', path: '/shopping', label: '쇼핑', icon: '🛒' },
-    { name: 'mypage', path: '/myPage', label: '마이', icon: '👤' },
+    { name: 'microorganismTest', path: '/microorganismTest', label: '미생물 검사', icon: '/BottomNav/tab-microorganismTest.png' },
+    { name: 'record', path: '/record', label: '기록', icon: '/BottomNav/tab-record.png' },
+    { name: 'home', path: '/', label: '홈', icon: '/BottomNav/tab-home.png' },
+    { name: 'shopping', path: '/shopping', label: '쇼핑', icon: '/BottomNav/tab-shopping.png' },
+    { name: 'mypage', path: '/myPage', label: '마이', icon: '/BottomNav/tab-mypage.png' },
   ];
 
   return (
@@ -31,9 +32,14 @@ export function BottomNavBar() {
               href={tab.path}
               className="flex flex-col items-center justify-center flex-1 py-2 active:scale-95 transition-transform"
             >
-              <span className={`text-2xl mb-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>
-                {tab.icon}
-              </span>
+              <div className={`mb-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                <Image
+                  src={tab.icon}
+                  alt={tab.label}
+                  width={24}
+                  height={24}
+                />
+              </div>
               <span
                 className={`text-xs transition-colors ${
                   isActive ? 'text-[#FF6B6B] font-semibold' : 'text-gray-500'
