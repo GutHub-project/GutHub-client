@@ -92,6 +92,7 @@ function ProfileSetupContent() {
       backgroundColor: '#fff',
       padding: '0',
       position: 'relative',
+      paddingTop: 'env(safe-area-inset-top)',
     }}>
       {/* 헤더 */}
       <div style={{

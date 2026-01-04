@@ -65,7 +65,7 @@ function DietRecordContent() {
   };
 
   return (
-    <div style={{ backgroundColor: '#fff', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#fff', minHeight: '100vh', paddingTop: 'env(safe-area-inset-top)' }}>
       {step === 'search' && (
         <DietSearch
           mealType={mealType}
