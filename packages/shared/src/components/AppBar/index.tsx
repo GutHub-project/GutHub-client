@@ -19,7 +19,7 @@ interface AppBarProps {
 const AppBar = ({ leftContent, text, rightContent, bgColor = 'bg-background' }: AppBarProps) => {
   return (
     <div
-      className={`fixed top-0 left-auto right-auto z-100 flex justify-between items-center border-none px-4 pb-2 w-full h-[32px] ${bgColor}`}
+      className={`fixed top-0 left-auto right-auto z-100 flex justify-between items-center border-none px-4 pb-2 w-full min-h-[32px] ${bgColor}`}
       style={{
         paddingTop: 'calc(1rem + env(safe-area-inset-top))'
       }}
