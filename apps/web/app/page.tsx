@@ -11,6 +11,7 @@ export default function Web() {
       <main
         className="pb-[70px] overflow-y-auto"
         style={{
+          paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'calc(70px + env(safe-area-inset-bottom))',
         }}
       >
