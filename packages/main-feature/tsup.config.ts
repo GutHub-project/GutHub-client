@@ -9,14 +9,31 @@ export default defineConfig({
     "components/shopping/index": "src/components/shopping/index.ts",
   },
   format: ["cjs", "esm"],
-  dts: true,
-  splitting: false,
-  sourcemap: false,
+  dts: {
+    resolve: true,
+    compilerOptions: {
+      skipLibCheck: true,
+      jsx: "react-jsx",
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+    },
+  },
   banner: {
     js: "'use client';",
   },
   clean: true,
-  external: ["react", "react-dom", "react-native", "@repo/shared", "next", "next/image", "next/navigation"],
-  treeshake: true,
+  external: [
+    "react",
+    "react-dom",
+    "react-native",
+    "@repo/shared",
+    "next",
+    "next/image",
+    "next/navigation",
+    "axios",
+    "zustand",
+    "@tanstack/react-query",
+  ],
+  injectStyle: true,
 });
 
