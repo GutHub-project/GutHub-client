@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, StyleSheet, View, ActivityIndicator, Alert, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 interface SocialLoginWebViewProps {
@@ -108,7 +109,7 @@ export const SocialLoginWebView = ({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         {initialLoading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF6B6B" />
@@ -149,7 +150,7 @@ export const SocialLoginWebView = ({
           // 구글 로그인 대응을 위한 userAgent 설정
           userAgent="Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36"
         />
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -29,7 +30,7 @@ export const SimpleLoginScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logoWrapper}>
@@ -83,7 +84,7 @@ export const SimpleLoginScreen = () => {
         onSuccess={handleLoginSuccess}
         onClose={() => setWebViewVisible(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
