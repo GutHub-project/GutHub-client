@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
-import { authApi, useAuthStore } from '@repo/shared';
+import { authApi, useAuthStore, type Gender } from '@repo/shared';
 
 /**
  * 프로필 설정 페이지 (신규 회원)
@@ -17,7 +17,7 @@ function ProfileSetupContent() {
   const [formData, setFormData] = useState<{
     nickname: string;
     ageRange: number;
-    gender: string;
+    gender: Gender | '';
     gutType: string;
   }>({
     nickname: '',
@@ -55,7 +55,12 @@ function ProfileSetupContent() {
       console.log('[ProfileSetup] Form data:', formData);
 
       // 회원가입 완료 API 호출 (공통 authApi 사용)
-      const data = await authApi.completeSignup(formData, tempToken);
+      const data = await authApi.completeSignup({
+        nickname: formData.nickname,
+        ageRange: formData.ageRange,
+        gender: formData.gender as Gender,
+        gutType: formData.gutType,
+      }, tempToken);
 
       // 액세스 토큰 저장 및 상태 업데이트
       await setAccessToken(data.accessToken);
