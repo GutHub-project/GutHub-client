@@ -6,6 +6,7 @@ export default defineConfig({
     "stores/index": "src/stores/index.ts",
     "providers/index": "src/providers/index.ts",
     "components/index": "src/components/index.ts",
+    "hooks/index": "src/hooks/index.ts",
   },
   format: ["cjs", "esm"],
   dts: {

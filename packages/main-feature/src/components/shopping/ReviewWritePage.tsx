@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AppBar } from '@repo/shared';
-import useAppRouter from '@repo/shared/hooks/useRouter';
+import { AppBar, useAppRouter } from '@repo/shared';
 import type { Product } from './types';
 
 // 더미 상품 데이터
