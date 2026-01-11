@@ -1,5 +1,14 @@
 import { useRouter } from 'next/navigation';
 
+// React Native WebView 타입 선언
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
 const useAppRouter = () => {
   const router = useRouter();
   const isWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView;
