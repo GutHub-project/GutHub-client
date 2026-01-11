@@ -1,9 +1,11 @@
 import { publicApiInstance, privateApiInstance } from '../instance';
 import type {
+  ApiResponse,
   AuthResponse,
-  RefreshTokenRequest,
   RefreshTokenResponse,
   SocialProvider,
+  CompleteSignupRequest,
+  CompleteSignupResponse,
 } from '../../types';
 
 /**
@@ -30,14 +32,18 @@ export const authApi = {
   },
 
   /**
-   * 회원가입 완료
-   * @param data - 회원가입 완료 데이터
+   * 소셜 회원가입 완료
+   * 소셜 로그인 후 추가 정보를 입력하여 회원가입을 완료하고 정식 Access Token을 발급받습니다.
+   * @param data - 회원가입 완료 데이터 (nickname, ageRange, gender, gutType)
    * @param tempToken - 임시 인증 토큰 (Bearer Token으로 전송)
-   * @returns 인증 토큰 및 사용자 정보
+   * @returns 정식 액세스 토큰
    */
-  completeSignup: async (data: any, tempToken: string): Promise<AuthResponse> => {
+  completeSignup: async (
+    data: CompleteSignupRequest,
+    tempToken: string
+  ): Promise<CompleteSignupResponse> => {
     console.log('[authApi] completeSignup called');
-    const response = await publicApiInstance.post<AuthResponse>(
+    const response = await publicApiInstance.post<ApiResponse<CompleteSignupResponse>>(
       '/auth/signup/complete',
       data,
       {
@@ -46,7 +52,7 @@ export const authApi = {
         },
       }
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -57,11 +63,12 @@ export const authApi = {
    * @returns 새로운 액세스 토큰
    */
   refreshToken: async (refreshToken?: string): Promise<RefreshTokenResponse> => {
-    const response = await publicApiInstance.post<RefreshTokenResponse>(
+    const response = await publicApiInstance.post<ApiResponse<RefreshTokenResponse>>(
       '/jwt/refresh',
-      refreshToken ? { refreshToken } : {} // 네이티브: body에 포함, 웹: 쿠키로 전송
+      refreshToken ? { refreshToken } : {},
+      { withCredentials: true }
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -71,4 +78,17 @@ export const authApi = {
   logout: async (): Promise<void> => {
     await privateApiInstance.post('/logout');
   },
+};
+
+/**
+ * JWT API
+ */
+export const jwtApi = {
+  /**
+   * Access Token 재발급
+   * Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.
+   * @param refreshToken - (네이티브 전용) 저장된 refresh token
+   * @returns 새로운 액세스 토큰
+   */
+  refresh: authApi.refreshToken,
 };

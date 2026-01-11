@@ -1,19 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { dietApi } from '../apis';
-import type { MealType, SelectedFood } from './types';
+import { dietApi } from '@repo/shared';
+import type { MealType, SelectedFood, MealTypeToApi } from './types';
 
 interface DietListProps {
   mealType: MealType;
   foods: SelectedFood[];
+  date?: string; // YYYY-MM-DD 형식
   onEdit: (foodId: number) => void;
   onRemove: (foodId: number) => void;
   onComplete: () => void;
   onBack: () => void;
 }
 
-export function DietList({ mealType, foods, onEdit, onRemove, onComplete, onBack }: DietListProps) {
+// MealType 매핑
+const mealTypeMap: Record<MealType, 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK'> = {
+  '아침': 'BREAKFAST',
+  '점심': 'LUNCH',
+  '저녁': 'DINNER',
+  '간식': 'SNACK',
+};
+
+export function DietList({ mealType, foods, date, onEdit, onRemove, onComplete, onBack }: DietListProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleComplete = async () => {
@@ -25,16 +34,17 @@ export function DietList({ mealType, foods, onEdit, onRemove, onComplete, onBack
     try {
       setIsLoading(true);
 
-      // 현재 날짜 (YYYY-MM-DD)
-      const today = new Date().toISOString().split('T')[0];
+      // 날짜 (props로 받거나 현재 날짜 사용)
+      const logDate = date || new Date().toISOString().split('T')[0];
+      const apiMealType = mealTypeMap[mealType];
 
       // API 요청 데이터 생성
       const requestData = {
-        logDate: today,
+        logDate,
         items: foods.map((food) => ({
           foodName: food.name,
           amount: food.amount,
-          mealType,
+          mealType: apiMealType,
         })),
       };
 
@@ -123,7 +133,7 @@ export function DietList({ mealType, foods, onEdit, onRemove, onComplete, onBack
                       marginLeft: '8px',
                     }}
                   >
-                    {food.amount}인분 (76g)
+                    {food.amount}인분
                   </span>
                 </div>
 

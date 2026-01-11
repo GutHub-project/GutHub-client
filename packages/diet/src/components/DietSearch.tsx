@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { dietApi, type Food } from '../apis';
+import { dietApi, type Food } from '@repo/shared';
 import type { MealType } from './types';
 
 interface DietSearchProps {
@@ -62,7 +62,7 @@ export function DietSearch({ mealType, onSearch, onBack }: DietSearchProps) {
         >
           ←
         </button>
-        <h1 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>식단 기록</h1>
+        <h1 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>식단 기록 - {mealType}</h1>
       </div>
 
       {/* 컨텐츠 */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import {
   DietSearch,
   DietSearchResults,
@@ -14,10 +14,24 @@ import {
 
 type Step = 'search' | 'results' | 'select' | 'list';
 
+// MealType 매핑 (API -> 한글)
+const apiToMealType: Record<string, MealType> = {
+  'BREAKFAST': '아침',
+  'LUNCH': '점심',
+  'DINNER': '저녁',
+  'SNACK': '간식',
+};
+
 function DietRecordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const mealType = (searchParams.get('mealType') || '아침') as MealType;
+  
+  // URL 파라미터에서 식사 타입과 날짜 가져오기
+  const mealTypeParam = searchParams.get('mealType') || 'BREAKFAST';
+  const dateParam = searchParams.get('date') || new Date().toISOString().split('T')[0];
+  
+  // API MealType을 한글로 변환
+  const mealType: MealType = apiToMealType[mealTypeParam] || '아침';
 
   const [step, setStep] = useState<Step>('search');
   const [searchResults, setSearchResults] = useState<Food[]>([]);
@@ -35,7 +49,15 @@ function DietRecordContent() {
   };
 
   const handleAddFood = (food: Food, amount: number) => {
-    setFoodList((prev) => [...prev, { ...food, amount }]);
+    // 이미 추가된 음식이면 수량 업데이트
+    const existingIndex = foodList.findIndex(f => f.id === food.id);
+    if (existingIndex >= 0) {
+      setFoodList(prev => prev.map((f, i) => 
+        i === existingIndex ? { ...f, amount } : f
+      ));
+    } else {
+      setFoodList((prev) => [...prev, { ...food, amount }]);
+    }
     setStep('list');
   };
 
@@ -95,6 +117,7 @@ function DietRecordContent() {
         <DietList
           mealType={mealType}
           foods={foodList}
+          date={dateParam}
           onEdit={handleEditFood}
           onRemove={handleRemoveFood}
           onComplete={handleComplete}

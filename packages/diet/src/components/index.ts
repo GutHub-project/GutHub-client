@@ -3,4 +3,5 @@ export { DietSearchResults } from './DietSearchResults';
 export { DietFoodSelect} from './DietFoodSelect';
 export { DietList } from './DietList';
 
-export type { MealType, SelectedFood } from './types';
+export type { MealType, SelectedFood, Food } from './types';
+export { MealTypeToApi, ApiToMealType } from './types';

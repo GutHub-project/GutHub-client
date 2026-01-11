@@ -1,72 +1,57 @@
 'use client';
 
-// 더미 데이터
-const PRODUCTS = [
-  {
-    id: 1,
-    name: '제품이름',
-    rating: 4.5,
-    reviews: 2302,
-    description: '[1+1]구성 블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 2,
-    name: '제품이름',
-    rating: 4.5,
-    reviews: 2302,
-    description: '[1+1]구성 블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 3,
-    name: '제품이름',
-    rating: 4.5,
-    reviews: 2302,
-    description: '[1+1]구성 블드라 프로바이오틱스',
-    price: 28200,
-  },
-];
-
-const HEALTH_PRODUCTS = [
-  {
-    id: 1,
-    rank: 1,
-    category: '에너지 어썸리',
-    name: '블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 2,
-    rank: 2,
-    category: '에너지 어썸리',
-    name: '블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 3,
-    rank: 3,
-    category: '에너지 어썸리',
-    name: '블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 4,
-    rank: 4,
-    category: '에너지 어썸리',
-    name: '블드라 프로바이오틱스',
-    price: 28200,
-  },
-  {
-    id: 5,
-    rank: 5,
-    category: '에너지 어썸리',
-    name: '블드라 프로바이오틱스',
-    price: 28200,
-  },
-];
+import { useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { searchApi, userApi, type Supplement } from '@repo/shared';
 
 export function ShoppingPage() {
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // 사용자 프로필 조회 (장 건강 유형 확인용)
+  const { data: profileData } = useQuery({
+    queryKey: ['user', 'profile'],
+    queryFn: () => userApi.getProfile(),
+    retry: false,
+  });
+
+  // 제품 검색
+  const { data: searchData, isLoading: isSearchLoading } = useQuery({
+    queryKey: ['search', 'products', searchQuery],
+    queryFn: () => searchApi.searchProducts(searchQuery),
+    enabled: !!searchQuery,
+  });
+
+  // 인기 제품 (프로바이오틱스로 기본 검색)
+  const { data: popularData, isLoading: isPopularLoading } = useQuery({
+    queryKey: ['search', 'products', 'popular'],
+    queryFn: () => searchApi.searchProducts('프로바이오틱스'),
+  });
+
+  const handleSearch = useCallback(() => {
+    if (searchKeyword.trim()) {
+      setSearchQuery(searchKeyword.trim());
+    }
+  }, [searchKeyword]);
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    },
+    [handleSearch]
+  );
+
+  const gutTypeName = profileData?.gutType?.name || '변비형';
+  const products: Supplement[] = searchQuery
+    ? searchData?.supplementList || []
+    : popularData?.supplementList || [];
+  const isLoading = searchQuery ? isSearchLoading : isPopularLoading;
+
+  // 랭킹 데이터 (상위 5개)
+  const rankingProducts = products.slice(0, 5);
+
   return (
     <div style={{ backgroundColor: '#fff', minHeight: '100vh', overflowY: 'auto' }}>
       {/* 헤더 */}
@@ -101,6 +86,9 @@ export function ShoppingPage() {
           <input
             type="text"
             placeholder="제품명 또는 성분명을 검색해주세요"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyPress={handleKeyPress}
             style={{
               flex: 1,
               border: 'none',
@@ -123,57 +111,95 @@ export function ShoppingPage() {
           }}
         >
           <div style={{ fontSize: '16px', fontWeight: '700', color: '#333', flex: 1 }}>
-            <span style={{ color: '#ff6b6b' }}>&apos;변비형&apos;</span> 에게 지금 인기있는 건강기능식품
+            <span style={{ color: '#ff6b6b' }}>&apos;{gutTypeName}&apos;</span> 에게 지금 인기있는 건강기능식품
           </div>
           <div style={{ fontSize: '12px', color: '#999', cursor: 'pointer' }}>더보기 &gt;</div>
         </div>
 
         {/* 가로 스크롤 상품 목록 */}
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px' }}>
-          {PRODUCTS.map((product) => (
-            <div
-              key={product.id}
-              style={{
-                minWidth: '160px',
-                backgroundColor: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e5e5e5',
-                overflow: 'hidden',
-                cursor: 'pointer',
-              }}
-            >
-              {/* 상품 이미지 */}
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>로딩 중...</div>
+        ) : products.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+            {searchQuery ? '검색 결과가 없습니다.' : '상품이 없습니다.'}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px' }}>
+            {products.slice(0, 6).map((product) => (
               <div
+                key={product.supplementId}
                 style={{
-                  width: '100%',
-                  height: '160px',
-                  backgroundColor: '#f5f5f5',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  minWidth: '160px',
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid #e5e5e5',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: '40px' }}>📦</span>
+                {/* 상품 이미지 */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '160px',
+                    backgroundColor: '#f5f5f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.supplementName}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '40px' }}>📦</span>
+                  )}
+                </div>
+                {/* 상품 정보 */}
+                <div style={{ padding: '12px' }}>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#333',
+                      marginBottom: '4px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {product.brand}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '12px', color: '#ffa500' }}>⭐</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      {product.avgRating.toFixed(1)} ({product.cntReview.toLocaleString()})
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: '#999',
+                      marginBottom: '8px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {product.supplementName}
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: '700', color: '#333' }}>
+                    {product.price.toLocaleString()}원
+                  </div>
+                </div>
               </div>
-              {/* 상품 정보 */}
-              <div style={{ padding: '12px' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '4px' }}>
-                  {product.name}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '12px', color: '#ffa500' }}>⭐</span>
-                  <span style={{ fontSize: '12px', color: '#666' }}>
-                    {product.rating} ({product.reviews.toLocaleString()})
-                  </span>
-                </div>
-                <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>{product.description}</div>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: '#333' }}>
-                  {product.price.toLocaleString()}원
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 랭킹 섹션 */}
@@ -192,62 +218,87 @@ export function ShoppingPage() {
         </div>
 
         {/* 랭킹 목록 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {HEALTH_PRODUCTS.map((product) => (
-            <div
-              key={product.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px',
-                backgroundColor: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e5e5e5',
-                cursor: 'pointer',
-              }}
-            >
-              {/* 순위 */}
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>로딩 중...</div>
+        ) : rankingProducts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>랭킹 데이터가 없습니다.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {rankingProducts.map((product, index) => (
               <div
+                key={product.supplementId}
                 style={{
-                  fontSize: '18px',
-                  fontWeight: '700',
-                  color: product.rank <= 3 ? '#ff6b6b' : '#999',
-                  marginRight: '12px',
-                  minWidth: '24px',
-                }}
-              >
-                {product.rank}
-              </div>
-              {/* 상품 이미지 */}
-              <div
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '8px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '12px',
+                  padding: '12px',
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid #e5e5e5',
+                  cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: '24px' }}>📦</span>
-              </div>
-              {/* 상품 정보 */}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '12px', color: '#999', marginBottom: '2px' }}>{product.category}</div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '4px' }}>
-                  {product.name}
+                {/* 순위 */}
+                <div
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    color: index < 3 ? '#ff6b6b' : '#999',
+                    marginRight: '12px',
+                    minWidth: '24px',
+                  }}
+                >
+                  {index + 1}
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#333' }}>
-                  {product.price.toLocaleString()}원
+                {/* 상품 이미지 */}
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '12px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.supplementName}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '24px' }}>📦</span>
+                  )}
                 </div>
+                {/* 상품 정보 */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '2px' }}>{product.brand}</div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#333',
+                      marginBottom: '4px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {product.supplementName}
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#333' }}>
+                    {product.price.toLocaleString()}원
+                  </div>
+                </div>
+                {/* 화살표 */}
+                <div style={{ fontSize: '16px', color: '#ccc' }}>&gt;</div>
               </div>
-              {/* 화살표 */}
-              <div style={{ fontSize: '16px', color: '#ccc' }}>&gt;</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
