@@ -2,6 +2,7 @@
   "name": "@repo/main-feature",
   "version": "0.0.0",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "react-native": "./src/index.ts",
   "exports": {
@@ -24,10 +25,16 @@
       "require": "./dist/apis/auth.js"
     },
     "./components": {
-      "react-native": "./src/components/index.ts",
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.mjs",
-      "require": "./dist/components/index.js"
+      "react-native": "./src/components/web/index.ts",
+      "types": "./dist/components/web/index.d.ts",
+      "import": "./dist/components/web/index.mjs",
+      "require": "./dist/components/web/index.js"
+    },
+    "./components/shopping": {
+      "react-native": "./src/components/shopping/index.ts",
+      "types": "./dist/components/shopping/index.d.ts",
+      "import": "./dist/components/shopping/index.mjs",
+      "require": "./dist/components/shopping/index.js"
     }
   },
   "scripts": {
