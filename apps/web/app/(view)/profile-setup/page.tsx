@@ -80,7 +80,7 @@ function ProfileSetupContent() {
     { label: '30대', value: 30 },
     { label: '40대', value: 40 },
   ];
-  const genderOptions = [
+  const genderOptions: { label: string; value: Gender }[] = [
     { label: '남성', value: 'MALE' },
     { label: '여성', value: 'FEMALE' },
   ];
