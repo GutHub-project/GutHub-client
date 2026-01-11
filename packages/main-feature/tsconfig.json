@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "skipLibCheck": true,
-    "types": ["node"],
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM"],
     "allowSyntheticDefaultImports": true,
