@@ -1,12 +1,20 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: {
-    index: "src/index.ts",
-    "pages/index": "src/pages/index.ts",
-    "apis/auth": "src/apis/auth/index.ts",
-    "components/index": "src/components/web/index.ts",
-  },
+  entry: [
+    "src/index.ts",
+    "src/pages/index.ts",
+    "src/apis/auth/index.ts",
+    "src/components/web/index.ts",
+    "src/components/shopping/index.ts",
+    "src/components/shopping/ProductDetailPage.tsx",
+    "src/components/shopping/ReviewWritePage.tsx",
+    "src/components/shopping/ReviewListPage.tsx",
+    "src/components/shopping/ReviewDetailPage.tsx",
+    "src/components/shopping/ReviewFilterModal.tsx",
+    "src/components/shopping/ShoppingScreen.tsx",
+    "src/components/shopping/types.ts",
+  ],
   format: ["cjs", "esm"],
   dts: {
     resolve: true,
