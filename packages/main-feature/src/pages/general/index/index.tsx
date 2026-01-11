@@ -32,22 +32,6 @@ const formatDisplayDate = (date: Date): string => {
  */
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-/**
- * 오늘 기준 일주일 날짜 배열 생성
- */
-const getWeekDates = () => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0: 일요일
-  const dates: Date[] = [];
-  
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - dayOfWeek + i);
-    dates.push(date);
-  }
-  
-  return dates;
-};
 
 const General = () => {
   const router = useRouter();
@@ -68,7 +52,6 @@ const General = () => {
     []
   );
 
-  const weekDates = useMemo(() => getWeekDates(), []);
   const selectedDate = toISODateString(dates[selectedDateIndex]);
 
   // 장 건강 상태 조회
