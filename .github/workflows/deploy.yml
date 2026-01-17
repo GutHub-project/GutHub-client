@@ -90,7 +90,33 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST \
+          # SSH 연결 테스트
+          echo "🔍 EC2 연결 테스트 중..."
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=10 \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=3 \
+              -i private_key.pem \
+              $EC2_USER@$EC2_HOST \
+              "echo '✅ EC2 연결 성공'" || {
+            echo "❌ EC2 연결 실패. 가능한 원인:"
+            echo "   1. EC2 인스턴스가 실행 중이 아닙니다"
+            echo "   2. Security Group에서 SSH(22번 포트) 접근이 차단되어 있습니다"
+            echo "   3. EC2_HOST 값이 잘못되었습니다 (현재: $EC2_HOST)"
+            echo "   4. EC2_USER 값이 잘못되었습니다 (현재: $EC2_USER)"
+            echo "   5. 네트워크 문제 (Public IP 없음 또는 VPC 설정)"
+            exit 1
+          }
+          
+          echo "🚀 배포 스크립트 실행 중..."
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=30 \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=3 \
+              -i private_key.pem \
+              $EC2_USER@$EC2_HOST \
             ECR_REGISTRY="$ECR_REGISTRY" \
             IMAGE_TAG="$IMAGE_TAG" \
             ECR_REPOSITORY="$ECR_REPOSITORY" \
