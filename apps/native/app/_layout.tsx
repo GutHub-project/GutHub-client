@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuthStore, initializeAuth } from '../src/stores/authStore';
+import { useAuthStore, initializeAuth } from '@repo/shared';
 
 SplashScreen.preventAutoHideAsync();
 

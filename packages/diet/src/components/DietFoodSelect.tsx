@@ -71,41 +71,57 @@ export function DietFoodSelect({ food, initialAmount = 1, onAdd, onBack }: DietF
         {/* 선택된 음식 */}
         <div
           style={{
-            padding: '20px 40px',
-            backgroundColor: '#fff',
-            border: '2px solid #ff6b6b',
-            borderRadius: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 20px',
+            backgroundColor: '#FFF5F5',
+            border: '2px solid #FF7878',
+            borderRadius: '12px',
             marginBottom: '60px',
+            width: '100%',
           }}
         >
-          <span
+          <div
             style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#333',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
             }}
           >
-            {food.name}
-          </span>
-          <span
-            style={{
-              fontSize: '12px',
-              color: '#ff6b6b',
-              marginLeft: '8px',
-            }}
-          >
-            1인분 (76g)
-          </span>
+            <span
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#333',
+              }}
+            >
+              {food.name}
+            </span>
+            <span
+              style={{
+                fontSize: '14px',
+                color: '#666',
+                fontWeight: '400',
+              }}
+            >
+              {initialAmount || 1}인분 ({Math.round((initialAmount || 1) * 76)}g)
+            </span>
+          </div>
           <button
             onClick={onBack}
             style={{
-              marginLeft: '12px',
               background: 'none',
               border: 'none',
-              fontSize: '16px',
+              fontSize: '20px',
               color: '#999',
               cursor: 'pointer',
-              padding: '0',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
             }}
           >
             ✕
@@ -117,74 +133,90 @@ export function DietFoodSelect({ food, initialAmount = 1, onAdd, onBack }: DietF
           style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '40px',
             marginBottom: '40px',
           }}
         >
-          <button
-            onClick={handleDecrease}
-            disabled={amount <= 0.5}
+          <div
             style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              border: 'none',
-              backgroundColor: amount <= 0.5 ? '#f0f0f0' : '#ff6b6b',
-              color: '#fff',
-              fontSize: '24px',
-              cursor: amount <= 0.5 ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '40px',
             }}
           >
-            −
-          </button>
+            <span
+              style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#666',
+              }}
+            >
+              총
+            </span>
+            <button
+              onClick={handleDecrease}
+              disabled={amount <= 0.5}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: amount <= 0.5 ? '#f0f0f0' : '#FF7878',
+                color: '#fff',
+                fontSize: '20px',
+                cursor: amount <= 0.5 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              −
+            </button>
 
-          <span
-            style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#333',
-              minWidth: '60px',
-              textAlign: 'center',
-            }}
-          >
-            {amount}
-          </span>
+            <span
+              style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#333',
+                minWidth: '40px',
+                textAlign: 'center',
+              }}
+            >
+              {amount}
+            </span>
 
-          <button
-            onClick={handleIncrease}
-            style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              border: 'none',
-              backgroundColor: '#ff6b6b',
-              color: '#fff',
-              fontSize: '24px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            +
-          </button>
+            <button
+              onClick={handleIncrease}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                border: 'none',
+                backgroundColor: '#FF7878',
+                color: '#fff',
+                fontSize: '20px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              +
+            </button>
+            <span
+              style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#666',
+              }}
+            >
+              인분 먹었어요
+            </span>
+          </div>
         </div>
 
-        {/* 인분 먹었어요 텍스트 */}
-        <div
-          style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#666',
-          }}
-        >
-          인분 먹었어요
-        </div>
-
-        {/* 목록에 담기 버튼 */}
+        {/* 수정하기 버튼 */}
         <button
           onClick={handleAdd}
           style={{
@@ -193,7 +225,7 @@ export function DietFoodSelect({ food, initialAmount = 1, onAdd, onBack }: DietF
             left: '20px',
             right: '20px',
             padding: '16px',
-            backgroundColor: '#ff6b6b',
+            backgroundColor: '#FF7878',
             color: '#fff',
             border: 'none',
             borderRadius: '8px',
@@ -202,7 +234,7 @@ export function DietFoodSelect({ food, initialAmount = 1, onAdd, onBack }: DietF
             cursor: 'pointer',
           }}
         >
-          목록에 담기
+          수정하기
         </button>
       </div>
     </div>

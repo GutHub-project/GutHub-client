@@ -11,7 +11,7 @@ import { authApi, useAuthStore, type Gender } from '@repo/shared';
 function ProfileSetupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setAccessToken } = useAuthStore();
+  const { setAccessToken, setUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [formData, setFormData] = useState<{
@@ -64,6 +64,19 @@ function ProfileSetupContent() {
 
       // 액세스 토큰 저장 및 상태 업데이트
       await setAccessToken(data.accessToken);
+      
+      // 유저 정보도 store에 저장 (프로필 설정한 정보)
+      setUser({
+        nickname: formData.nickname,
+        ageRange: formData.ageRange,
+        gender: formData.gender as Gender,
+        gutType: {
+          code: formData.gutType,
+          name: formData.gutType,
+          description: '',
+          imageUrl: '',
+        },
+      });
       
       router.replace('/');
     } catch (error) {

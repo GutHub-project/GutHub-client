@@ -1,14 +1,39 @@
 'use client';
 
-import type { Food } from '../apis';
+import type { Food, SelectedFood } from './types';
 
 interface DietSearchResultsProps {
   results: Food[];
+  selectedFoods: SelectedFood[];
   onSelectFood: (food: Food) => void;
+  onAddFood: (food: Food) => void;
+  onRemoveFood: (foodId: number) => void;
   onBack: () => void;
+  onComplete: () => void;
 }
 
-export function DietSearchResults({ results, onSelectFood, onBack }: DietSearchResultsProps) {
+export function DietSearchResults({
+  results,
+  selectedFoods,
+  onSelectFood,
+  onAddFood,
+  onRemoveFood,
+  onBack,
+  onComplete,
+}: DietSearchResultsProps) {
+  const isFoodSelected = (foodId: number) => {
+    return selectedFoods.some((f) => f.id === foodId);
+  };
+
+  const handleFoodClick = (food: Food) => {
+    if (isFoodSelected(food.id)) {
+      onRemoveFood(food.id);
+    } else {
+      // 기본 1인분으로 추가
+      onAddFood(food);
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
       {/* 헤더 */}
@@ -40,7 +65,7 @@ export function DietSearchResults({ results, onSelectFood, onBack }: DietSearchR
       </div>
 
       {/* 컨텐츠 */}
-      <div style={{ padding: '40px 20px' }}>
+      <div style={{ padding: '40px 20px', paddingBottom: '100px' }}>
         <h2
           style={{
             fontSize: '20px',
@@ -66,69 +91,98 @@ export function DietSearchResults({ results, onSelectFood, onBack }: DietSearchR
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {results.map((food) => (
-              <button
-                key={food.id}
-                onClick={() => onSelectFood(food)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '16px',
-                  backgroundColor: '#fff',
-                  border: '1px solid #e5e5e5',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9f9f9';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fff';
-                }}
-              >
-                <span
+            {results.map((food) => {
+              const isSelected = isFoodSelected(food.id);
+              const selectedFood = selectedFoods.find((f) => f.id === food.id);
+
+              return (
+                <div
+                  key={food.id}
                   style={{
-                    fontSize: '16px',
-                    fontWeight: '500',
-                    color: '#333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '16px',
+                    backgroundColor: isSelected ? '#FFF5F5' : '#fff',
+                    border: isSelected ? '2px solid #FF7878' : '1px solid #e5e5e5',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onClick={() => handleFoodClick(food)}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = '#f9f9f9';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = '#fff';
+                    }
                   }}
                 >
-                  {food.name}
-                </span>
-                <span
-                  style={{
-                    fontSize: '20px',
-                    color: '#ff6b6b',
-                  }}
-                >
-                  +
-                </span>
-              </button>
-            ))}
+                  <span
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      color: '#333',
+                    }}
+                  >
+                    {food.name}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isSelected) {
+                        onRemoveFood(food.id);
+                      } else {
+                        onSelectFood(food);
+                      }
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '20px',
+                      color: isSelected ? '#FF7878' : '#999',
+                      cursor: 'pointer',
+                      padding: '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '24px',
+                      height: '24px',
+                    }}
+                  >
+                    {isSelected ? '✕' : '+'}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* 2개 담겼어요 버튼 */}
-        <button
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            right: '20px',
-            padding: '16px',
-            backgroundColor: '#ff6b6b',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-          }}
-        >
-          2개 담겼어요
-        </button>
+        {/* 담긴 개수 표시 및 완료 버튼 */}
+        {selectedFoods.length > 0 && (
+          <button
+            onClick={onComplete}
+            style={{
+              position: 'fixed',
+              bottom: '20px',
+              left: '20px',
+              right: '20px',
+              padding: '16px',
+              backgroundColor: '#FF7878',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+            }}
+          >
+            {selectedFoods.length}개 담겼어요
+          </button>
+        )}
       </div>
     </div>
   );

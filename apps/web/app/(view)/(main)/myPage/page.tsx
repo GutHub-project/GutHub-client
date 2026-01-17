@@ -15,7 +15,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 function MyPageContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { isAuthenticated, setAccessToken } = useAuthStore();
+  const { isAuthenticated, setAccessToken, setUser } = useAuthStore();
   const searchParams = useSearchParams();
   const tempToken = searchParams.get('tempToken'); // 회원가입 시 임시 토큰
 
@@ -57,8 +57,29 @@ function MyPageContent() {
   const updateProfileMutation = useMutation({
     mutationFn: (data: { nickname: string; ageRange: number; gender: Gender; gutType: string }) =>
       userApi.updateProfile(data),
-    onSuccess: () => {
+    onSuccess: async (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+      
+      // Store에 유저 정보 업데이트
+      const profileData = await queryClient.fetchQuery({
+        queryKey: ['user', 'profile'],
+        queryFn: () => userApi.getProfile(),
+      });
+      
+      if (profileData) {
+        setUser({
+          nickname: profileData.nickname || '',
+          ageRange: profileData.ageRange || 0,
+          gender: profileData.gender || '',
+          gutType: profileData.gutType || {
+            code: '',
+            name: '',
+            description: '',
+            imageUrl: '',
+          },
+        });
+      }
+      
       alert('프로필이 업데이트되었습니다.');
     },
     onError: (error) => {
@@ -71,8 +92,22 @@ function MyPageContent() {
   const completeSignupMutation = useMutation({
     mutationFn: (data: { nickname: string; ageRange: number; gender: Gender; gutType: string }) =>
       authApi.completeSignup(data, tempToken!),
-    onSuccess: async (response) => {
+    onSuccess: async (response, variables) => {
       await setAccessToken(response.accessToken);
+      
+      // 유저 정보도 store에 저장 (회원가입한 정보)
+      setUser({
+        nickname: variables.nickname,
+        ageRange: variables.ageRange,
+        gender: variables.gender,
+        gutType: {
+          code: variables.gutType,
+          name: variables.gutType,
+          description: '',
+          imageUrl: '',
+        },
+      });
+      
       alert('회원가입이 완료되었습니다!');
       router.replace('/');
     },

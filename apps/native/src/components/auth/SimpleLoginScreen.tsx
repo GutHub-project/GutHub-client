@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore, userApi } from '@repo/shared';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { SocialLoginWebView } from './SocialLoginWebView';
+import { Logo } from '../../Logo';
+import { LogoName } from '../../LogoName';
 
 const BASE_URL = 'http://api.guthub.shop:8080';
 const WEB_URL = 'https://guthub.shop';
@@ -23,10 +25,36 @@ export const SimpleLoginScreen = () => {
     setWebViewVisible(true);
   };
 
-  const handleLoginSuccess = (accessToken: string, refreshToken?: string) => {
+  const handleLoginSuccess = async (accessToken: string, refreshToken?: string) => {
     console.log('[Login] Success! Got accessToken, 토큰 저장');
-    // 토큰만 저장하고 라우팅하지 않음 - WebView가 계속 진행됨
-    setAccessToken(accessToken);
+    const { setUser } = useAuthStore.getState();
+    
+    try {
+      // 1. Access Token 저장
+      await setAccessToken(accessToken);
+      
+      // 2. 유저 정보 불러오기
+      try {
+        const userInfo = await userApi.getProfile();
+        setUser({
+          nickname: userInfo.nickname || '',
+          ageRange: userInfo.ageRange || 0,
+          gender: userInfo.gender || '',
+          gutType: userInfo.gutType || {
+            code: '',
+            name: '',
+            description: '',
+            imageUrl: '',
+          },
+        });
+        console.log('[SimpleLoginScreen] 유저 정보 불러오기 성공:', userInfo);
+      } catch (error) {
+        console.error('[SimpleLoginScreen] 유저 정보 불러오기 실패:', error);
+        // 유저 정보 불러오기 실패해도 계속 진행
+      }
+    } catch (error) {
+      console.error('[SimpleLoginScreen] 로그인 처리 실패:', error);
+    }
   };
 
   return (
@@ -34,16 +62,8 @@ export const SimpleLoginScreen = () => {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logoWrapper}>
-            <Image
-              source={{ uri: '/AppBar/logo.svg' }}
-              style={styles.logoIcon}
-              resizeMode="contain"
-            />
-            <Image
-              source={{ uri: '/AppBar/logo-name.svg' }}
-              style={styles.logoName}
-              resizeMode="contain"
-            />
+            <Logo width={60} height={60} />
+            <LogoName width={120} height={28} />
           </View>
           <Text style={styles.description}>오직 내 만을 위한 장 건강 케어</Text>
         </View>
@@ -105,18 +125,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoWrapper: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
     marginBottom: 20,
-  },
-  logoIcon: {
-    width: 80,
-    height: 80,
-    marginBottom: 12,
-  },
-  logoName: {
-    width: 120,
-    height: 28,
   },
   description: {
     fontSize: 14,

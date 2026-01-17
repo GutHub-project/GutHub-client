@@ -1,1 +1,1 @@
-export { useAuthStore, getAccessToken, initializeAuth } from './authStore';
+export { useAuthStore, getAccessToken, initializeAuth, checkTokenStatus } from './authStore';

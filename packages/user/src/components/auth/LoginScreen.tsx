@@ -1,5 +1,5 @@
 import { authApi } from '@repo/main-feature/apis/auth';
-import { Text, useAuthStore, BASE_URL } from '@repo/shared';
+import { Text, useAuthStore, BASE_URL, userApi } from '@repo/shared';
 import { colors } from '@repo/tailwind-config/colors';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -18,7 +18,7 @@ import { SocialLoginWebView } from './SocialLoginWebView';
  */
 export const LoginScreen = () => {
   const router = useRouter();
-  const { login: setAuthState } = useAuthStore();
+  const { setAccessToken, setUser } = useAuthStore();
   const [webViewVisible, setWebViewVisible] = useState(false);
   const [loginUrl, setLoginUrl] = useState('');
 
@@ -54,10 +54,39 @@ export const LoginScreen = () => {
    * 로그인 성공 (기존 회원)
    * @param accessToken - 액세스 토큰
    */
-  const handleLoginSuccess = (accessToken: string) => {
+  const handleLoginSuccess = async (accessToken: string) => {
     console.log('[LoginScreen] 로그인 성공');
-    setAuthState({ accessToken });
-    router.replace('/');
+    
+    try {
+      // 1. Access Token 저장
+      await setAccessToken(accessToken);
+      
+      // 2. 유저 정보 불러오기
+      try {
+        const userInfo = await userApi.getProfile();
+        setUser({
+          nickname: userInfo.nickname || '',
+          ageRange: userInfo.ageRange || 0,
+          gender: userInfo.gender || '',
+          gutType: userInfo.gutType || {
+            code: '',
+            name: '',
+            description: '',
+            imageUrl: '',
+          },
+        });
+        console.log('[LoginScreen] 유저 정보 불러오기 성공:', userInfo);
+      } catch (error) {
+        console.error('[LoginScreen] 유저 정보 불러오기 실패:', error);
+        // 유저 정보 불러오기 실패해도 계속 진행
+      }
+      
+      // 3. 메인 페이지로 이동
+      router.replace('/');
+    } catch (error) {
+      console.error('[LoginScreen] 로그인 처리 실패:', error);
+      router.replace('/');
+    }
   };
 
   /**

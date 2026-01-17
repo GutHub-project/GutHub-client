@@ -53,8 +53,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
+    "@expo/cli": "^0.18.0",
     "@types/react": "~18.3.12",
     "@types/react-native-dotenv": "^0.2.2",
+    "eas-cli": "^16.28.0",
     "react-native-dotenv": "^3.4.11",
     "typescript": "5.8.3"
   },

@@ -12,14 +12,37 @@ export const requestInterceptor = (config: InternalAxiosRequestConfig): Internal
   // Zustand store에서 access token 가져오기
   const accessToken = getAccessToken();
 
+  // 토큰 확인 로깅
+  const url = config.url || '';
+  const method = config.method?.toUpperCase() || 'GET';
+  const fullUrl = config.baseURL ? `${config.baseURL}${url}` : url;
+
+  console.log(`[Request Interceptor] ${method} ${fullUrl}`);
+  console.log(`[Request Interceptor] Access Token 존재: ${accessToken ? 'YES' : 'NO'}`);
+  
   if (accessToken) {
+    // 토큰의 일부만 로깅 (보안)
+    const tokenPreview = accessToken.length > 20 
+      ? `${accessToken.substring(0, 20)}...` 
+      : accessToken;
+    console.log(`[Request Interceptor] Token Preview: ${tokenPreview}`);
     config.headers.Authorization = `Bearer ${accessToken}`;
+    console.log(`[Request Interceptor] Authorization 헤더 설정 완료`);
+  } else {
+    console.warn(`[Request Interceptor] ⚠️ Access Token이 없습니다. 인증이 필요한 요청일 수 있습니다.`);
   }
 
   return config;
 };
 
 export const successInterceptor = (response: AxiosResponse): AxiosResponse => {
+  const url = response.config.url || '';
+  const method = response.config.method?.toUpperCase() || 'GET';
+  const fullUrl = response.config.baseURL ? `${response.config.baseURL}${url}` : url;
+  
+  console.log(`[Response Interceptor] ✅ ${method} ${fullUrl} - Status: ${response.status}`);
+  console.log(`[Response Interceptor] Response Data:`, response.data);
+  
   return response;
 };
 

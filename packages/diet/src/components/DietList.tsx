@@ -117,24 +117,32 @@ export function DietList({ mealType, foods, date, onEdit, onRemove, onComplete, 
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <span
+                  <div
                     style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#333',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
                     }}
                   >
-                    {food.name}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: '14px',
-                      color: '#ff6b6b',
-                      marginLeft: '8px',
-                    }}
-                  >
-                    {food.amount}인분
-                  </span>
+                    <span
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#333',
+                      }}
+                    >
+                      {food.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        color: '#666',
+                        fontWeight: '400',
+                      }}
+                    >
+                      {food.amount}인분 {food.amount ? `(${Math.round(food.amount * 76)}g)` : ''}
+                    </span>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>

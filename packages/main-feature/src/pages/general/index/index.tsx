@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { gutHealthApi, dietApi, useAuthStore } from '@repo/shared';
+import { gutHealthApi, dietApi, useAuthStore, userApi } from '@repo/shared';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -35,23 +35,56 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const General = () => {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated, setUser } = useAuthStore();
   const nickname = user?.nickname || '허브';
 
-  // 날짜 상태
-  const [selectedDateIndex, setSelectedDateIndex] = useState(1); // 어제/오늘/내일 중 오늘
+  // 날짜 상태 - 가운데를 항상 오늘로 고정
+  const [selectedDateIndex, setSelectedDateIndex] = useState(1); // 가운데(오늘) 고정
   const [selectedWeekDay, setSelectedWeekDay] = useState(new Date().getDay()); // 요일 선택
 
-  // 어제, 오늘, 내일 날짜 배열
+  // 로그인 상태이고 유저 정보가 없으면 유저 정보 불러오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (isAuthenticated && !user?.nickname) {
+        try {
+          const userInfo = await userApi.getProfile();
+          setUser({
+            nickname: userInfo.nickname || '',
+            ageRange: userInfo.ageRange || 0,
+            gender: userInfo.gender || '',
+            gutType: userInfo.gutType || {
+              code: '',
+              name: '',
+              description: '',
+              imageUrl: '',
+            },
+          });
+          console.log('[General] 유저 정보 불러오기 성공:', userInfo);
+        } catch (error) {
+          console.error('[General] 유저 정보 불러오기 실패:', error);
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, [isAuthenticated, user, setUser]);
+
+  // 어제, 오늘, 내일 날짜 배열 (가운데가 항상 오늘) - 항상 최신 날짜 반영
   const dates = useMemo(
-    () => [
-      new Date(Date.now() - 24 * 60 * 60 * 1000),
-      new Date(Date.now()),
-      new Date(Date.now() + 24 * 60 * 60 * 1000),
-    ],
-    []
+    () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // 시간을 0시로 설정하여 정확한 날짜 비교
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      return [yesterday, today, tomorrow]; // 어제, 오늘, 내일
+    },
+    [] // 한 번만 계산하지만, 컴포넌트가 새로 마운트되면 최신 날짜로 계산됨
   );
 
+  // 선택된 날짜
   const selectedDate = toISODateString(dates[selectedDateIndex]);
 
   // 장 건강 상태 조회
@@ -124,14 +157,19 @@ const General = () => {
     간식: [],
   };
 
-  const handleAddMeal = (mealType: string) => {
-    const mealTypeMap: Record<string, string> = {
-      아침: 'BREAKFAST',
-      점심: 'LUNCH',
-      저녁: 'DINNER',
-      간식: 'SNACK',
-    };
-    router.push(`/diet/record?mealType=${mealTypeMap[mealType]}&date=${selectedDate}`);
+  const handleAddMeal = (mealType?: string) => {
+    if (mealType) {
+      const mealTypeMap: Record<string, string> = {
+        아침: 'BREAKFAST',
+        점심: 'LUNCH',
+        저녁: 'DINNER',
+        간식: 'SNACK',
+      };
+      router.push(`/diet/record?mealType=${mealTypeMap[mealType]}&date=${selectedDate}`);
+    } else {
+      // 식사 선택 화면으로 이동
+      router.push(`/diet/record?date=${selectedDate}`);
+    }
   };
 
   return (
@@ -200,7 +238,7 @@ const General = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[18px] font-bold text-[#333]">나의 식단 기록</h2>
               <button
-                onClick={() => handleAddMeal('아침')}
+                onClick={() => handleAddMeal()}
                 className="w-6 h-6 flex items-center justify-center"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -232,45 +270,55 @@ const General = () => {
               })}
             </div>
 
-            {/* 식단 카드 그리드 */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* 아침 카드 */}
-              <MealCard
-                icon="🍳"
-                title="아침"
-                date={selectedDate.replace(/-/g, '.')}
-                foods={categorizedDietLogs.아침}
-                onAdd={() => handleAddMeal('아침')}
-                isLoading={isDietLoading}
-              />
-              {/* 점심 카드 */}
-              <MealCard
-                icon="🍱"
-                title="점심"
-                date={selectedDate.replace(/-/g, '.')}
-                foods={categorizedDietLogs.점심}
-                onAdd={() => handleAddMeal('점심')}
-                isLoading={isDietLoading}
-              />
-              {/* 저녁 카드 */}
-              <MealCard
-                icon="🍲"
-                title="저녁"
-                date={selectedDate.replace(/-/g, '.')}
-                foods={categorizedDietLogs.저녁}
-                onAdd={() => handleAddMeal('저녁')}
-                isLoading={isDietLoading}
-              />
-              {/* 간식 카드 */}
-              <MealCard
-                icon="🍪"
-                title="간식"
-                date={selectedDate.replace(/-/g, '.')}
-                foods={categorizedDietLogs.간식}
-                onAdd={() => handleAddMeal('간식')}
-                isLoading={isDietLoading}
-              />
-            </div>
+            {/* 식단 카드 그리드 또는 빈 상태 메시지 */}
+            {!isDietLoading &&
+            categorizedDietLogs.아침.length === 0 &&
+            categorizedDietLogs.점심.length === 0 &&
+            categorizedDietLogs.저녁.length === 0 &&
+            categorizedDietLogs.간식.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <p className="text-[#FF7878] text-[14px]">식단을 기록하지 않았어요</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {/* 아침 카드 */}
+                <MealCard
+                  icon="🍳"
+                  title="아침"
+                  date={selectedDate.replace(/-/g, '.')}
+                  foods={categorizedDietLogs.아침}
+                  onAdd={() => {}}
+                  isLoading={isDietLoading}
+                />
+                {/* 점심 카드 */}
+                <MealCard
+                  icon="🍱"
+                  title="점심"
+                  date={selectedDate.replace(/-/g, '.')}
+                  foods={categorizedDietLogs.점심}
+                  onAdd={() => {}}
+                  isLoading={isDietLoading}
+                />
+                {/* 저녁 카드 */}
+                <MealCard
+                  icon="🍲"
+                  title="저녁"
+                  date={selectedDate.replace(/-/g, '.')}
+                  foods={categorizedDietLogs.저녁}
+                  onAdd={() => {}}
+                  isLoading={isDietLoading}
+                />
+                {/* 간식 카드 */}
+                <MealCard
+                  icon="🍪"
+                  title="간식"
+                  date={selectedDate.replace(/-/g, '.')}
+                  foods={categorizedDietLogs.간식}
+                  onAdd={() => {}}
+                  isLoading={isDietLoading}
+                />
+              </div>
+            )}
           </div>
 
           {/* 식단 비율 */}
@@ -358,11 +406,6 @@ const MealCard = ({ icon, title, date, foods, onAdd, isLoading }: MealCardProps)
           <p className="text-[14px] font-bold text-[#333]">{title}</p>
           <p className="text-[10px] text-[#999]">{date}</p>
         </div>
-        <button onClick={onAdd} className="p-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5V19M5 12H19" stroke="#CCCCCC" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
