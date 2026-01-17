@@ -2,7 +2,8 @@ import { useRef, useEffect, useState } from 'react';
 import { StyleSheet, BackHandler, ToastAndroid, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { storage } from '../src/utils/storage';
+import { getAccessToken } from '../src/apis/instance';
 
 const WEB_URL = 'https://guthub.shop';
 
@@ -94,6 +95,32 @@ export default function Home() {
       console.log('Message parsing error:', error);
     }
   };
+
+  // 앱 시작 시 저장된 토큰을 WebView에 주입
+  useEffect(() => {
+    const injectTokens = async () => {
+      const refreshToken = await storage.getItem('refreshToken');
+      const accessToken = getAccessToken();
+      
+      if (webViewRef.current && (refreshToken || accessToken)) {
+        const script = `
+          (function() {
+            ${refreshToken ? `window.localStorage.setItem('refreshToken', '${refreshToken}');` : ''}
+            ${accessToken ? `window.localStorage.setItem('accessToken', '${accessToken}');` : ''}
+            true;
+          })();
+        `;
+        webViewRef.current.injectJavaScript(script);
+      }
+    };
+
+    // WebView가 로드된 후 토큰 주입
+    const timer = setTimeout(() => {
+      injectTokens();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>

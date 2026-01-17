@@ -90,24 +90,55 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # SSH 연결 테스트
+          # SSH 연결 테스트 (재시도 로직 포함)
           echo "🔍 EC2 연결 테스트 중..."
-          ssh -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o ConnectTimeout=10 \
-              -o ServerAliveInterval=60 \
-              -o ServerAliveCountMax=3 \
-              -i private_key.pem \
-              $EC2_USER@$EC2_HOST \
-              "echo '✅ EC2 연결 성공'" || {
-            echo "❌ EC2 연결 실패. 가능한 원인:"
-            echo "   1. EC2 인스턴스가 실행 중이 아닙니다"
-            echo "   2. Security Group에서 SSH(22번 포트) 접근이 차단되어 있습니다"
-            echo "   3. EC2_HOST 값이 잘못되었습니다 (현재: $EC2_HOST)"
-            echo "   4. EC2_USER 값이 잘못되었습니다 (현재: $EC2_USER)"
-            echo "   5. 네트워크 문제 (Public IP 없음 또는 VPC 설정)"
-            exit 1
-          }
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          CONNECTED=false
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "시도 $RETRY_COUNT/$MAX_RETRIES..."
+            
+            if ssh -o StrictHostKeyChecking=no \
+                -o UserKnownHostsFile=/dev/null \
+                -o ConnectTimeout=15 \
+                -o ServerAliveInterval=60 \
+                -o ServerAliveCountMax=3 \
+                -o BatchMode=yes \
+                -i private_key.pem \
+                $EC2_USER@$EC2_HOST \
+                "echo '✅ EC2 연결 성공'" 2>&1; then
+              CONNECTED=true
+              break
+            else
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "연결 실패. 5초 후 재시도..."
+                sleep 5
+              fi
+            fi
+          done
+          
+          if [ "$CONNECTED" != "true" ]; then
+            echo ""
+            echo "❌ EC2 SSH 연결 실패 (3회 시도 후 실패)"
+            echo ""
+            echo "⚠️  확인 필요 사항:"
+            echo "   1. AWS 콘솔에서 EC2 인스턴스가 'running' 상태인지 확인"
+            echo "   2. Security Group 인바운드 규칙에서 SSH(22번 포트)가 허용되어 있는지 확인"
+            echo "     - 소스: 0.0.0.0/0 (모든 IP) 또는 GitHub Actions IP"
+            echo "   3. EC2 인스턴스에 Public IP가 할당되어 있는지 확인"
+            echo "   4. VPC/서브넷이 Public 서브넷인지 확인"
+            echo "   5. Network ACL에서 22번 포트가 차단되지 않았는지 확인"
+            echo ""
+            echo "현재 설정:"
+            echo "  EC2_HOST: ${EC2_HOST}"
+            echo "  EC2_USER: ${EC2_USER}"
+            echo ""
+            echo "배포를 건너뜁니다. ECR 이미지는 빌드되었으므로 수동 배포 가능합니다."
+            echo "이미지: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            exit 0
+          fi
           
           echo "🚀 배포 스크립트 실행 중..."
           ssh -o StrictHostKeyChecking=no \
